@@ -2,6 +2,7 @@ import pandas
 import datetime
 import warnings
 
+
 warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 example_log = pandas.DataFrame({"ocel:timestamp":[],"ocel:oid":[],"ocel:type":[],"ocel:activity":[],"ocel:eid":[]})
 
@@ -80,7 +81,7 @@ for ot in example_log["ocel:type"].unique():
 #time.sleep(5)
 #   & \textsc{pay}  &  $\{ \texttt{c}_1, \texttt{o}_4, \texttt{i}_7, \texttt{i}_8, \texttt{i}_9\},$
 
-
+from OCIM.src import *
 #example_log = example_log[example_log["ocel:activity"].isin(["pay","confirm","store","send"])]
 div, con, rel = get_interaction_patterns([example_log])
 #dfgs = get_cummulative_directly_follows_relation([example_log])

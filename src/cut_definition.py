@@ -1,5 +1,5 @@
 from OCIM.src.auxillary_methods import *
-
+import itertools
 
 """ Methods to check if a cut is strictly valid. This code is not optimized in any way but rather a 1:1 reflection 
 of the formulas for the cut definition from Section 3.1 of the paper. If needed in any time-critical setting, please
