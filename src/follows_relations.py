@@ -2,6 +2,22 @@ import pm4py
 import networkx
 
 
+
+
+def get_transitive_closure_partition_relations(partition_list, dfgs, div, rel):
+    partition_relation = get_partition_follows_relations(partition_list, dfgs, div, rel)
+    return networkx.transitive_closure(networkx.DiGraph(partition_relation), reflexive=False).edges()
+
+
+
+def get_partition_follows_relations(partition_list, dfgs, div, rel):
+    return [(i,j) for i in range(len(partition_list))
+            for j in range(len(partition_list)) if any([dfgs[ot][0].get((a,b)) for a in partition_list[i]
+        for b in partition_list[j] for ot in (rel[a] & rel[b])
+        if ot not in div[a] & div[b]]) and i != j]
+
+
+
 def get_transitive_closure_follows_relation(relation_frames):
 
     result = {}

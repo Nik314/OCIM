@@ -6,7 +6,7 @@ import itertools
 
 
 
-def detect_fallthrough_fitness(relations, dfgs, clos, rel, div):
+def detect_fallthrough_fitness_brute_force(relations, dfgs, clos, rel, div):
 
     print("Fall Through Detection Triggered")
     alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))

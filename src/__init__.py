@@ -51,7 +51,7 @@ def object_centric_inductive_miner(relation_frames, div, rel):
 
     result = find_strict_cut(relation_frames,dfgs,clos,rel,div)
     if result is None:
-        result = detect_fallthrough_fitness(relation_frames,dfgs,clos,rel,div)
+        result = detect_fallthrough_fitness_brute_force(relation_frames,dfgs,clos,rel,div)
 
     print(result)
     print("##############################################################################")
@@ -82,7 +82,7 @@ def print_result(result, depth = 0):
 
 if __name__ == "__main__":
     import time
-    relations = pm4py.read_ocel("../OCIM/data/running-example.jsonocel").relations
+    relations = pm4py.read_ocel("../data/running-example.jsonocel").relations
     div, con, rel = get_interaction_patterns([relations])
     print("Start Miner")
     start = time.time()
