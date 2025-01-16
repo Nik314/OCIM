@@ -1,5 +1,5 @@
 from auxillary_methods import *
-
+from fallthrough_definition import *
 
 def evaluate_concurrent_fallthrough(part_one, part_two, dfgs, clos, rel, div):
 
@@ -64,7 +64,7 @@ def evaluate_sequence_fallthrough(part_one, part_two, dfgs, clos, rel, div):
                 else:
                     precision_correct += 1
             for ot in get_non_divergent_types(a,b,part_one+part_two,div,rel):
-                if not clos[ot][0].get((a, b), 0):
+                if not clos[ot].get((a, b), 0):
                     precision_violation += 1
                 else:
                     precision_correct += 1

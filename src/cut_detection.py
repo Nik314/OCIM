@@ -12,6 +12,29 @@ with the same name in the paper (Algorithm 4,5,6,7 for concurrent, choice, seque
 
 
 
+def find_strict_cut(relation_frames, dfgs, clos, rel, div):
+
+    sequence = find_cut_sequence(relation_frames, dfgs, clos, rel, div)
+    if sequence:
+        return (sequence, is_sequence_cut_valid)
+
+    exclusive = find_cut_exclusive(relation_frames, dfgs, clos, rel, div)
+    if exclusive:
+        return (exclusive, is_exclusive_cut_valid)
+
+    loop = find_cut_loop(relation_frames, dfgs, clos, rel, div)
+    if loop:
+        return (loop, is_loop_cut_valid)
+
+    concurrent = find_cut_concurrent(relation_frames,dfgs,clos,rel,div)
+    if concurrent:
+        return (concurrent, is_concurrent_cut_valid)
+
+
+    return None
+
+
+
 def check_concurrent(relation_frames, dfgs, rel, a, b, alphabet):
     for ot in rel[a] & rel[b]:
         if not (dfgs[ot][0].get((a,b),0) and dfgs[ot][0].get((b,a),0)):

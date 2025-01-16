@@ -4,6 +4,7 @@ from OCIM.src.cut_definition import *
 from OCIM.src.follows_relations import *
 from OCIM.src.cut_detection import *
 from OCIM.src.fall_throughs import *
+from OCIM.src.fallthrough_detection import *
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -15,30 +16,6 @@ warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 def split_log(relation, partition):
     return [relation[relation["ocel:activity"].isin(part)] for part in partition]
 
-
-def find_strict_cut(relation_frames, dfgs, clos, rel, div):
-
-    print("Check Concurrent")
-    concurrent = find_cut_concurrent(relation_frames,dfgs,clos,rel,div)
-    if concurrent:
-        return (concurrent, is_concurrent_cut_valid)
-
-    print("Check Exclusive")
-    exclusive = find_cut_exclusive(relation_frames, dfgs, clos, rel, div)
-    if exclusive:
-        return (exclusive, is_exclusive_cut_valid)
-
-    print("Check Sequence")
-    sequence = find_cut_sequence(relation_frames, dfgs, clos, rel, div)
-    if sequence:
-        return (sequence, is_sequence_cut_valid)
-
-    print("Check Loop")
-    loop = find_cut_loop(relation_frames, dfgs, clos, rel, div)
-    if loop:
-        return (loop, is_loop_cut_valid)
-
-    return None
 
 
 def object_centric_inductive_miner(relation_frames, div, rel):
