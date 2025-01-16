@@ -1,5 +1,6 @@
 import pm4py
 import networkx
+from auxillary_methods import *
 
 
 
@@ -13,8 +14,7 @@ def get_transitive_closure_partition_relations(partition_list, dfgs, div, rel):
 def get_partition_follows_relations(partition_list, dfgs, div, rel):
     return [(i,j) for i in range(len(partition_list))
             for j in range(len(partition_list)) if any([dfgs[ot][0].get((a,b)) for a in partition_list[i]
-        for b in partition_list[j] for ot in (rel[a] & rel[b])
-        if ot not in div[a] & div[b]]) and i != j]
+        for b in partition_list[j] for ot in get_non_divergent_types(a,b,partition_list[i]+partition_list[j],div,rel)]) and i != j]
 
 
 
