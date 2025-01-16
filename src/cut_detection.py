@@ -132,6 +132,8 @@ def check_sequence_1(clos, rel, div, a, b):
 def check_sequence_2(partition_closure, i, j):
     if not (i,j) in partition_closure and not (j,i) in partition_closure:
         return True
+    if (i,j) in partition_closure and (j,i) in partition_closure:
+        return True
     return False
 
 

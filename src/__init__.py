@@ -60,10 +60,10 @@ def print_result(result, depth = 0):
 
 if __name__ == "__main__":
     import time
-    relations = pm4py.read_ocel("../data/running-example.jsonocel").relations
-    div, con, rel = get_interaction_patterns([relations])
     print("Start Miner")
     start = time.time()
+    relations = pm4py.read_ocel("../data/recruiting.jsonocel").relations
+    div, con, rel = get_interaction_patterns([relations])
     result = object_centric_inductive_miner([relations], div, rel)
     print_result(result)
     print(time.time()-start)
