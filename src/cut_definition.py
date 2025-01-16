@@ -3,7 +3,7 @@ import itertools
 
 """ Methods to check if a cut is strictly valid. This code is not optimized in any way but rather a 1:1 reflection 
 of the formulas for the cut definition from Section 3.1 of the paper. If needed in any time-critical setting, please
-refer to the optimized RUST implementation from the DOCBP project of RWTH Aachen & Celonis. """
+refer to the planned optimized RUST implementation from the DOCBP project of RWTH Aachen & Celonis. """
 
 
 def is_concurrent_cut_valid(relation_frames, partition_list, dfgs, clos, rel, div):
@@ -68,7 +68,7 @@ def is_exclusive_cut_valid(relation_frames, partition_list, dfgs, clos, rel, div
                     if not dfgs[ot][0].get((a, b), 0) or not dfgs[ot][0].get((b, a), 0):
                         return False
 
-    #check if there is at least one non diverging object type between any two
+    # check if there is at least one non diverging object type between any two
     # partition parts (Section 3.1., Equation 22)
     for (i, j) in itertools.combinations(range(len(partition_list)), 2):
         if not any(get_non_divergent_types(a,b,partition_list[i]+partition_list[j], div, rel)
@@ -79,14 +79,6 @@ def is_exclusive_cut_valid(relation_frames, partition_list, dfgs, clos, rel, div
 
 
 def is_sequence_cut_valid(relation_frames, partition_list, dfgs, clos, rel, div):
-
-    #check if there is at least one non diverging object type between any two
-    #partition parts that follow each other (Section 3.1., Equation 25)
-    for (i, j) in itertools.combinations(range(len(partition_list)), 2):
-        if not any(get_non_divergent_types(a,b,partition_list[i]+partition_list[j], div, rel)
-               for a in partition_list[i] for b in partition_list[j]):
-            return False
-
 
     for (i, j) in itertools.combinations(range(len(partition_list)), 2):
         if i > j: i,j = j,i
@@ -104,6 +96,13 @@ def is_sequence_cut_valid(relation_frames, partition_list, dfgs, clos, rel, div)
                 for ot in get_non_divergent_types(a,b,sum([partition_list[k] for k in range(i,j+1)],[]),div,rel):
                     if not clos[ot].get((a, b), 0) or clos[ot].get((b, a), 0):
                         return False
+
+    #check if there is at least one non diverging object type between any two
+    #partition parts that follow each other (Section 3.1., Equation 25)
+    for (i, j) in itertools.combinations(range(len(partition_list)), 2):
+        if not any(get_non_divergent_types(a,b,partition_list[i]+partition_list[j], div, rel)
+               for a in partition_list[i] for b in partition_list[j]):
+            return False
 
     return True
 
@@ -156,7 +155,7 @@ def is_loop_cut_valid(relations, partition_list, dfgs, clos, rel, div):
     for a in partition_list[0]:
         for b in partition_list[1]:
             for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],div,rel):
-                if dfgs[ot][0].get((a,b),0) and not a in dfgs[ot][2]:
+                if dfgs[ot][0].get((a,b),0) and not dfgs[ot][2].get(a,0):
                     return False
 
     #check if all crossings from the redo to the body part of the loop go to start activities in the body
@@ -164,7 +163,7 @@ def is_loop_cut_valid(relations, partition_list, dfgs, clos, rel, div):
     for a in partition_list[1]:
         for b in partition_list[0]:
             for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],div,rel):
-                if dfgs[ot][0].get((a,b),0) and not b in dfgs[ot][1]:
+                if dfgs[ot][0].get((a,b),0) and not dfgs[ot][1].get(b,0):
                     return False
 
     return True

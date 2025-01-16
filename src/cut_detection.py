@@ -5,7 +5,9 @@ from scipy.sparse.csgraph import connected_components
 import networkx
 import more_itertools as mit
 
-"""Methods to detect"""
+"""Methods to detect cuts for the object-centric inductive miner in polynomial runtime. Methods are not optimized but 
+rather a 1:1 reflection of the papers section 3.2. Each of the methods below correspond to the pseudocode function 
+with the same name in the paper (Algorithm 4,5,6,7 for concurrent, choice, sequence and loop operator). """
 
 
 
@@ -23,7 +25,7 @@ def check_concurrent(relation_frames, dfgs, rel, a, b, alphabet):
     return False
 
 
-def detect_concurrent_cut(relation_frames, dfgs, clos, rel, div):
+def find_cut_concurrent(relation_frames, dfgs, clos, rel, div):
 
     alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
     edges = [[1 if a==b or check_concurrent(relation_frames,dfgs,rel,a,b,alphabet)
@@ -70,7 +72,7 @@ def check_exclusive_2(dfgs, rel, div, sigma_i, sigma_j):
     return False
 
 
-def detect_exclusive_cut(relation_frames, dfgs, clos, rel, div):
+def find_cut_exclusive(relation_frames, dfgs, clos, rel, div):
 
     alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
     edges = [[1 if a==b or check_exclusive_1(relation_frames,dfgs,rel,div,a,b,alphabet)
@@ -103,11 +105,11 @@ def check_sequence_1(clos, rel, div, a, b):
             return True
     return False
 
+
 def check_sequence_2(partition_closure, i, j):
     if not (i,j) in partition_closure and not (j,i) in partition_closure:
         return True
     return False
-
 
 
 def check_sequence_3(partition, i, j,div, rel, dfgs):
@@ -122,9 +124,7 @@ def check_sequence_3(partition, i, j,div, rel, dfgs):
     return False
 
 
-
-
-def detect_sequence_cut(relation_frames, dfgs, clos, rel, div):
+def find_cut_sequence(relation_frames, dfgs, clos, rel, div):
 
     alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
     edges = [[1 if a==b or check_sequence_1(clos,rel,div,a,b)
@@ -169,36 +169,62 @@ def detect_sequence_cut(relation_frames, dfgs, clos, rel, div):
 
 
 
-
-def detect_loop_cut(relation_frames, dfgs, clos, rel, div):
+def check_loop(relation_frames, dfgs, clos, rel,div, a,b):
 
     alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
 
-    #check for the full transitive closure of the alphabet
+    for ot in rel[a] & rel[b]:
+        if (not dfgs[ot][0].get((a,b),0) or not dfgs[ot][0].get((b,a),0) and
+                ot not in get_divergent_types(a,b,alphabet,div,rel)):
+            return True
+        if (dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0)) and (dfgs[ot][1].get(b,0) or dfgs[ot][2].get(b,0)):
+            return True
+        if (dfgs[ot][0].get((a, b), 0) and not dfgs[ot][2].get(a,0) and not dfgs[ot][1].get(b,0)
+            and ot not in get_divergent_types(a, b, alphabet, div, rel)):
+            return True
+
+    return False
+
+def find_cut_loop(relation_frames, dfgs, clos, rel, div):
+
+
+    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
+    object_types = list(set(sum([list(frame["ocel:type"].unique()) for frame in relation_frames],[])))
+
     for a in alphabet:
         for b in alphabet:
             for ot in get_non_divergent_types(a,b,alphabet,div,rel):
                 if not clos[ot].get((a,b),0) or not clos[ot].get((b,a),0):
                     return None
 
-    print("Potential Loop Cut Skipped!")
-    print("Switching To Brute Force For Loops (TODO) ")
+    edges = [[1 if a==b or check_loop(relation_frames,dfgs,clos,rel,div,a,b)
+              else 0 for a in alphabet] for b in alphabet]
+    n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
+    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
-    #check which object types are fully divergent
-    #if they do not have a full dfg connection, no loop cut is possible
+    if len(partition) == 1:
+        return None
 
+    body,redo = set(),set()
 
+    for ot in object_types:
+        if not any(ot in rel[a] and ot not in div[a] for a in alphabet):
+            continue
 
+        i = 0
+        for i in range(0,n_components):
+            if any(dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0) for a in partition[i]):
+                body = partition[i]
+                break
 
-    #check which object types are not fully divergent
-    #check each type if it is that one by checking if you can split the start and ends correctly
-    #then see if the other types can be adjusted to any of that existing partition
+        for j in range(0,n_components):
+            if i != j and any([ot in rel[a] for a in partition[j]]):
+                redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
+                if is_loop_cut_valid(relation_frames,[body,redo],dfgs,clos,rel,div):
+                    return [body,redo]
 
-    #or just go brute force for the two partition parts :D
-    for partition in mit.set_partitions(alphabet, 2):
-        for cut in itertools.permutations(partition, len(partition)):
-            for check in [is_loop_cut_valid]:
-                if check(relation_frames, cut, dfgs, clos, rel, div):
-                    return cut
+                print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
+                print([body,redo])
+
 

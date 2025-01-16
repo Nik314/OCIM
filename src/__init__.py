@@ -19,26 +19,27 @@ def split_log(relation, partition):
 def find_strict_cut(relation_frames, dfgs, clos, rel, div):
 
     print("Check Concurrent")
-    concurrent = detect_concurrent_cut(relation_frames,dfgs,clos,rel,div)
+    concurrent = find_cut_concurrent(relation_frames,dfgs,clos,rel,div)
     if concurrent:
         return (concurrent, is_concurrent_cut_valid)
 
     print("Check Exclusive")
-    exclusive = detect_exclusive_cut(relation_frames, dfgs, clos, rel, div)
+    exclusive = find_cut_exclusive(relation_frames, dfgs, clos, rel, div)
     if exclusive:
         return (exclusive, is_exclusive_cut_valid)
 
     print("Check Sequence")
-    sequence = detect_sequence_cut(relation_frames, dfgs, clos, rel, div)
+    sequence = find_cut_sequence(relation_frames, dfgs, clos, rel, div)
     if sequence:
         return (sequence, is_sequence_cut_valid)
 
     print("Check Loop")
-    loop = detect_loop_cut(relation_frames, dfgs, clos, rel, div)
+    loop = find_cut_loop(relation_frames, dfgs, clos, rel, div)
     if loop:
         return (loop, is_loop_cut_valid)
 
     return None
+
 
 def object_centric_inductive_miner(relation_frames, div, rel):
 
