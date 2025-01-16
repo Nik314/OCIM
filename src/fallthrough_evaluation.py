@@ -1,7 +1,6 @@
 from auxillary_methods import *
 
 
-
 def evaluate_concurrent_fallthrough(part_one, part_two, dfgs, clos, rel, div):
 
     precision_violation = 0
@@ -19,7 +18,10 @@ def evaluate_concurrent_fallthrough(part_one, part_two, dfgs, clos, rel, div):
                 else:
                     precision_correct += 1
 
-    return 1- (precision_violation / (precision_correct + precision_violation))
+    try:
+        return 1- (precision_violation / (precision_correct + precision_violation))
+    except:
+        return 1
 
 
 def evaluate_xor_fallthrough(part_one, part_two, dfgs, clos, rel, div):
@@ -39,7 +41,10 @@ def evaluate_xor_fallthrough(part_one, part_two, dfgs, clos, rel, div):
                 else:
                     precision_correct += 1
 
-    return 1 - (precision_violation / (precision_correct + precision_violation))
+    try:
+        return 1- (precision_violation / (precision_correct + precision_violation))
+    except:
+        return 1
 
 
 def evaluate_sequence_fallthrough(part_one, part_two, dfgs, clos, rel, div):
@@ -64,7 +69,10 @@ def evaluate_sequence_fallthrough(part_one, part_two, dfgs, clos, rel, div):
                 else:
                     precision_correct += 1
 
-    return 1 - (precision_violation / (precision_correct + precision_violation))
+    try:
+        return 1- (precision_violation / (precision_correct + precision_violation))
+    except:
+        return 1
 
 
 def evaluate_loop_fallthrough(part_one, part_two, dfgs, clos, rel, div):
@@ -91,5 +99,7 @@ def evaluate_loop_fallthrough(part_one, part_two, dfgs, clos, rel, div):
                 else:
                     precision_correct += 1
 
-    return 1 - (precision_violation / (precision_correct + precision_violation))
-
+    try:
+        return 1- (precision_violation / (precision_correct + precision_violation))
+    except:
+        return 1
