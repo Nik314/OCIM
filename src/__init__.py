@@ -3,7 +3,6 @@ from OCIM.src.interaction_patterns import *
 from OCIM.src.cut_definition import *
 from OCIM.src.follows_relations import *
 from OCIM.src.cut_detection import *
-from OCIM.src.fall_throughs import *
 from OCIM.src.fallthrough_detection import *
 import warnings
 import numpy as np
@@ -62,7 +61,7 @@ if __name__ == "__main__":
     import time
     print("Start Miner")
     start = time.time()
-    relations = pm4py.read_ocel("../data/github.jsonocel").relations
+    relations = pm4py.read_ocel("../data/running-example.jsonocel").relations
     div, con, rel = get_interaction_patterns([relations])
     result = object_centric_inductive_miner([relations], div, rel)
     print_result(result)
