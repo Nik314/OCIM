@@ -190,7 +190,6 @@ def find_cut_sequence(relation_frames, dfgs, clos, rel, div):
         return partition
 
     print("Invalid Seqeunce Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-    print(partition)
 
 
 
@@ -250,6 +249,5 @@ def find_cut_loop(relation_frames, dfgs, clos, rel, div):
                     return [body,redo]
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-                print([body,redo])
 
 
