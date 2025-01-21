@@ -83,16 +83,16 @@ def is_loop_fallthrough_valid(local_data, global_data, partition_list):
     #part of the loop (Section 3.1, Equation 31)
     for a in partition_list[0]:
         for b in partition_list[1]:
-            for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],div,rel):
-                if dfgs[ot][0].get((a,b),0) and not dfgs[ot][2].get(a,0):
+            for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],global_data):
+                if local_data.dfgs[ot][0].get((a,b),0) and not local_data.dfgs[ot][2].get(a,0):
                     return False
 
     #check if all crossings from the redo to the body part of the loop go to start activities in the body
     #part of the loop (Section 3.1, Equation 32)
     for a in partition_list[1]:
         for b in partition_list[0]:
-            for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],div,rel):
-                if dfgs[ot][0].get((a,b),0) and not dfgs[ot][1].get(b,0):
+            for ot in get_non_divergent_types(a,b,partition_list[0]+partition_list[1],global_data):
+                if local_data.dfgs[ot][0].get((a,b),0) and not local_data.dfgs[ot][1].get(b,0):
                     return False
 
     return True

@@ -165,7 +165,7 @@ def detect_fallthrough_fitness_brute_force(local_data, global_data):
 
         for check in [evaluate_xor_fallthrough, evaluate_concurrent_fallthrough]:
 
-            if check == evaluate_concurrent_fallthrough and not is_exclusive_fallthrough_valid(local_data,global_data, partition):
+            if check == evaluate_xor_fallthrough and not is_exclusive_fallthrough_valid(local_data,global_data, partition):
                 continue
             if check == evaluate_concurrent_fallthrough and not is_concurrent_fallthrough_valid(local_data,global_data, partition):
                 continue

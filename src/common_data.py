@@ -17,7 +17,9 @@ class LocalData:
 class GlobalData:
 
     def __init__(self, oc_log_list):
+        self.oc_log_list = oc_log_list
         div, con, rel = get_interaction_patterns(oc_log_list)
+        self.object_set = list(set(sum([list(log["ocel:oid"].unique()) for log in oc_log_list],[])))
         self.divergence = div
         self.convergence = con
         self.related = rel

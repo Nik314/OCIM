@@ -16,7 +16,17 @@ warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 
 
 
-def object_centric_inductive_miner(local_data, global_data, brute_force = False):
+def object_centric_inductive_miner(local_data, global_data, brute_force = False, noise = False):
+
+    partition, operator = detect_tau_cases(local_data,global_data)
+    if operator:
+        print(partition, operator)
+        print("##############################################################################")
+
+        sublogs = split_log(local_data, partition, operator)
+        subtrees = [object_centric_inductive_miner(sublogs[0], global_data, brute_force, noise),
+            LeafNode("tau",local_data.object_types,set(),set(),local_data.object_types)]
+        return OperatorNode(operator, subtrees)
 
     if len(local_data.alphabet) == 1:
         return LeafNode(local_data.alphabet[0],global_data.related,
@@ -33,7 +43,7 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False)
     print("##############################################################################")
 
     sublogs = split_log(local_data,partition,operator)
-    subtrees = [object_centric_inductive_miner(split_local_data, global_data) for split_local_data in sublogs]
+    subtrees = [object_centric_inductive_miner(split_local_data, global_data,brute_force,noise) for split_local_data in sublogs]
     return OperatorNode(operator, subtrees)
 
 

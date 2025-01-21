@@ -1,7 +1,29 @@
+import operator
+
 from OCIM.src.cut_definition import *
+from OCIM.src.oc_process_trees import *
 
 
 
+def detect_tau_cases(local_data, global_data):
+    if (set(global_data.object_set) - set(local_data.object_set)) & set(sum([list(log[log["ocel:type"].isin(sum([list(global_data.related[a]) for a in local_data.alphabet],[]))]["ocel:oid"].unique()) for log in global_data.oc_log_list], [])):
+        global_data.object_set = local_data.object_set
+        return [local_data.alphabet, []], Operator.Exclusive
 
-def detect_tau_cases(relations, object_set):
-    pass
+    for a in local_data.alphabet:
+        for b in local_data.alphabet:
+            for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data):
+                if not local_data.clos[ot].get((a,b),0) or not local_data.clos[ot].get((b,a),0):
+                    return None, None
+
+    for ot in local_data.object_types:
+        for a in local_data.alphabet:
+            for b in local_data.alphabet:
+                if local_data.dfgs[ot][2].get(a,0) and local_data.dfgs[ot][1].get(b,0) and not local_data.dfgs.get((a,b),0):
+                    return None, None
+
+    if not any(ot in global_data.related[a] and a not in global_data.divergence[a]
+           for a in local_data.alphabet for ot in local_data.object_types):
+        return None,None
+
+    return [local_data.alphabet, []], Operator.Loop
