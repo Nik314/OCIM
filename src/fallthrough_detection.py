@@ -1,7 +1,10 @@
+import operator
+
 from OCIM.src.fallthrough_definition import *
 from OCIM.src.fallthrough_evaluation import *
 from OCIM.src.auxillary_methods import *
 from OCIM.src.follows_relations import *
+from OCIM.src.oc_process_trees import *
 import more_itertools as mit
 import itertools
 import numpy
@@ -28,7 +31,7 @@ def detect_fallthrough_concurrent(local_data, global_data):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
     part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
-    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two]
+    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two], Operator.Concurrent
 
 
 
@@ -47,13 +50,13 @@ def detect_fallthrough_exclusive(local_data, global_data):
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
-        return -1, None
+        return -1, None, None
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
     distances = [[detect_distance_exclusive(local_data, global_data, p1,p2) for p1 in partition] for p2 in partition]
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
     part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
-    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two]
+    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two], Operator.Exclusive
 
 
 
@@ -64,7 +67,7 @@ def detect_fallthrough_sequence(local_data, global_data):
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
-        return -1, None
+        return -1, None, None
 
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
     partition_follows = get_transitive_closure_partition_relations(local_data,global_data,partition)
@@ -73,7 +76,7 @@ def detect_fallthrough_sequence(local_data, global_data):
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
-        return -1, None
+        return -1, None, None
 
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
     partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
@@ -87,10 +90,7 @@ def detect_fallthrough_sequence(local_data, global_data):
             best_score = score
             best_partition = [part_one,part_two]
 
-    return best_score,best_partition
-
-
-
+    return best_score,best_partition, Operator.Sequence
 
 
 def detect_loop_pair(local_data, global_data, a, b):
@@ -112,7 +112,7 @@ def detect_fallthrough_loop(local_data, global_data):
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
-        return -1, None
+        return -1, None, None
 
     best_partition, best_score = None, -1
     body,redo = set(), set()
@@ -132,15 +132,12 @@ def detect_fallthrough_loop(local_data, global_data):
             if i != j and any([ot in global_data.related[a] for a in partition[j]]):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
-                if is_loop_fallthrough_valid(local_data,global_data,body,redo) and body and redo:
+                if is_loop_fallthrough_valid(local_data,global_data,[body,redo]) and body and redo:
                     if evaluate_loop_fallthrough(local_data,global_data,body,redo) > best_score:
                         best_score = evaluate_loop_fallthrough(local_data,global_data,body,redo)
                         best_partition = [body,redo]
 
-                print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-    return best_score, best_partition
-
-
+    return best_score, best_partition, Operator.Loop
 
 
 
@@ -150,13 +147,11 @@ def detect_fallthrough_fitness_polynomial(local_data, global_data):
     best_score,best_partition, best_operator = 0.00, None, None
 
     for check in [detect_fallthrough_loop, detect_fallthrough_exclusive, detect_fallthrough_concurrent, detect_fallthrough_sequence]:
-        score, partition = check(local_data, global_data)
+        score, partition, operator = check(local_data, global_data)
         if score >= best_score:
-            best_score, best_partition, best_operator = score, partition, check
+            best_score, best_partition, best_operator = score, partition, operator
 
     return best_partition, best_operator
-
-
 
 
 
@@ -175,9 +170,9 @@ def detect_fallthrough_fitness_brute_force(local_data, global_data):
             if check == evaluate_concurrent_fallthrough and not is_concurrent_fallthrough_valid(local_data,global_data, partition):
                 continue
 
-            score = check(local_data,global_data,partition[0],partition[1])
+            score, operator = check(local_data,global_data,partition[0],partition[1])
             if score >= best_score:
-                best_score, best_partition, best_operator = score, partition, check
+                best_score, best_partition, best_operator = score, partition, operator
 
 
         for check in [evaluate_sequence_fallthrough, evaluate_loop_fallthrough]:
@@ -187,9 +182,9 @@ def detect_fallthrough_fitness_brute_force(local_data, global_data):
             if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(local_data,global_data, partition):
                 continue
 
-            score = check(local_data,global_data,partition[0],partition[1])
+            score, operator = check(local_data,global_data,partition[0],partition[1])
             if score >= best_score:
-                best_score, best_partition, best_operator = score, partition, check
+                best_score, best_partition, best_operator = score, partition, operator
 
         partition = list(reversed(partition))
         for check in [evaluate_sequence_fallthrough, evaluate_loop_fallthrough]:
@@ -199,9 +194,9 @@ def detect_fallthrough_fitness_brute_force(local_data, global_data):
                 if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(local_data,global_data, partition):
                     continue
 
-                score = check(local_data, global_data, partition[0], partition[1])
+                score, operator = check(local_data, global_data, partition[0], partition[1])
                 if score >= best_score:
-                    best_score, best_partition, best_operator = score, partition, check
+                    best_score, best_partition, best_operator = score, partition, operator
 
     return best_partition,best_operator
 

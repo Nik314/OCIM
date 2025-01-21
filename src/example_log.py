@@ -82,14 +82,7 @@ for ot in example_log["ocel:type"].unique():
 #   & \textsc{pay}  &  $\{ \texttt{c}_1, \texttt{o}_4, \texttt{i}_7, \texttt{i}_8, \texttt{i}_9\},$
 
 from OCIM.src import *
-#example_log = example_log[example_log["ocel:activity"].isin(["pay","confirm","store","send"])]
-div, con, rel = get_interaction_patterns([example_log])
-#dfgs = get_cummulative_directly_follows_relation([example_log])
-#clos = get_transitive_closure_follows_relation([example_log])
-#detect_concurrent_cut([example_log],dfgs,clos,rel,div)
-
-print_result(object_centric_inductive_miner([example_log], div, rel,example_log["ocel:oid"].unique()))
-
+print(str(object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))))
 exit()
 
 print(is_loop_cut_valid([example_log], [["identify"],["reject"]],dfgs,clos,rel,div))

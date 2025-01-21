@@ -18,16 +18,20 @@ warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 
 def object_centric_inductive_miner(local_data, global_data):
 
-    result = find_strict_cut(local_data, global_data)
-    if result is None:
-        result = detect_fallthrough_fitness_polynomial(local_data,global_data)
+    if len(local_data.alphabet) == 1:
+        return LeafNode(local_data.alphabet[0],global_data.related,
+            global_data.divergence,global_data.convergence,None)
 
-    print(result)
+    partition, operator = find_strict_cut(local_data, global_data)
+    if operator is None:
+        partition, operator = detect_fallthrough_fitness_polynomial(local_data,global_data)
+
+    print(partition,operator)
     print("##############################################################################")
 
-    sublogs = split_log(oc_log_list[0],result[0])
-    subtrees = [object_centric_inductive_miner([log], div, rel, object_set) for log in sublogs]
-    return (str(result[1]), subtrees)
+    sublogs = split_log(local_data,partition,operator)
+    subtrees = [object_centric_inductive_miner(split_local_data, global_data) for split_local_data in sublogs]
+    return OperatorNode(operator, subtrees)
 
 
 

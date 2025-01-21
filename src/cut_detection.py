@@ -1,7 +1,12 @@
+import operator
+
 from OCIM.src.cut_definition import *
 from OCIM.src.follows_relations import *
+from OCIM.src.oc_process_trees import *
 from scipy.sparse import csr_matrix
+
 from scipy.sparse.csgraph import connected_components
+
 import networkx
 import more_itertools as mit
 
@@ -14,9 +19,10 @@ with the same name in the paper (Algorithm 4,5,6,7 for concurrent, choice, seque
 
 def find_strict_cut(local_data, global_data):
     for check in [find_cut_sequence,find_cut_exclusive,find_cut_concurrent,find_cut_loop]:
-        partition = check(local_data, global_data)
+        partition,operator = check(local_data, global_data)
         if partition:
-            return (partition, check)
+            return partition, operator
+    return None, None
 
 
 
@@ -43,10 +49,10 @@ def find_cut_concurrent(local_data, global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     if is_concurrent_cut_valid(local_data,global_data,partition):
-        return partition
+        return partition, Operator.Concurrent
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
@@ -91,7 +97,7 @@ def find_cut_exclusive(local_data,global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b)
             or check_exclusive_2(local_data,global_data,
@@ -101,10 +107,10 @@ def find_cut_exclusive(local_data,global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     if is_exclusive_cut_valid(local_data,global_data,partition):
-        return partition
+        return partition, Operator.Exclusive
 
     print("Invalid Exclusive Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
@@ -148,7 +154,7 @@ def find_cut_sequence(local_data, global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     partition_closure = get_transitive_closure_partition_relations(local_data,global_data,partition)
     edges = [[1 if a==b or check_sequence_1(local_data, global_data, a, b) or check_sequence_2(partition_closure,
@@ -159,7 +165,7 @@ def find_cut_sequence(local_data, global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
     partition_closure = get_transitive_closure_partition_relations(local_data,global_data,partition)
@@ -174,10 +180,10 @@ def find_cut_sequence(local_data, global_data):
     partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     if is_sequence_cut_valid(local_data,global_data,partition):
-        return partition
+        return partition, Operator.Sequence
 
     print("Invalid Seqeunce Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
@@ -203,7 +209,7 @@ def find_cut_loop(local_data, global_data):
         for b in local_data.alphabet:
             for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data):
                 if not local_data.clos[ot].get((a,b),0) or not local_data.clos[ot].get((b,a),0):
-                    return None
+                    return None, None
 
     edges = [[1 if a==b or check_loop(local_data, global_data, a, b)
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
@@ -211,7 +217,7 @@ def find_cut_loop(local_data, global_data):
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
-        return None
+        return None, None
 
     body,redo = set(),set()
 
@@ -230,7 +236,7 @@ def find_cut_loop(local_data, global_data):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
                 if is_loop_cut_valid(local_data, global_data, [body,redo]):
-                    return [body,redo]
+                    return [body,redo], Operator.Loop
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
