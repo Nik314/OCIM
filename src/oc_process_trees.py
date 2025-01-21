@@ -41,7 +41,7 @@ class OperatorNode:
             indent += "\t"
         result = indent + str(self.operator) + "\n"
         for tree in self.subtrees:
-            result += str(tree)
+            result += tree.__str__(depth+1)
         return result
 
 

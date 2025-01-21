@@ -31,7 +31,7 @@ def detect_fallthrough_concurrent(local_data, global_data):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
     part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
-    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two], Operator.Concurrent
+    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.Concurrent
 
 
 
@@ -56,7 +56,7 @@ def detect_fallthrough_exclusive(local_data, global_data):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
     part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
-    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two], Operator.Exclusive
+    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.Exclusive
 
 
 
@@ -85,7 +85,7 @@ def detect_fallthrough_sequence(local_data, global_data):
     for i in range(1, len(partition)-1):
         part_one = sum([partition[j] for j in range(0,i)],[])
         part_two = sum([partition[j] for j in range(i,len(partition))],[])
-        score = evaluate_sequence_fallthrough(local_data,global_data,part_one,part_two)
+        score, operator = evaluate_sequence_fallthrough(local_data,global_data,part_one,part_two)
         if score >= best_score:
             best_score = score
             best_partition = [part_one,part_two]
@@ -133,8 +133,8 @@ def detect_fallthrough_loop(local_data, global_data):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
                 if is_loop_fallthrough_valid(local_data,global_data,[body,redo]) and body and redo:
-                    if evaluate_loop_fallthrough(local_data,global_data,body,redo) > best_score:
-                        best_score = evaluate_loop_fallthrough(local_data,global_data,body,redo)
+                    if evaluate_loop_fallthrough(local_data,global_data,body,redo)[0] > best_score:
+                        best_score, operator = evaluate_loop_fallthrough(local_data,global_data,body,redo)
                         best_partition = [body,redo]
 
     return best_score, best_partition, Operator.Loop

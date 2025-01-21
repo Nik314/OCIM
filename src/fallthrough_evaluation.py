@@ -1,5 +1,8 @@
+import operator
+
 from auxillary_methods import *
 from fallthrough_definition import *
+from OCIM.src.oc_process_trees import *
 
 def evaluate_concurrent_fallthrough(local_data, global_data, part_one, part_two):
 
@@ -19,9 +22,9 @@ def evaluate_concurrent_fallthrough(local_data, global_data, part_one, part_two)
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation))
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Concurrent
     except:
-        return 1
+        return 1, Operator.Concurrent
 
 
 def evaluate_xor_fallthrough(local_data, global_data, part_one, part_two):
@@ -42,9 +45,9 @@ def evaluate_xor_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation))
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Exclusive
     except:
-        return 1
+        return 1, Operator.Exclusive
 
 
 def evaluate_sequence_fallthrough(local_data, global_data, part_one, part_two):
@@ -70,9 +73,9 @@ def evaluate_sequence_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation))
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Sequence
     except:
-        return 1
+        return 1, Operator.Sequence
 
 
 def evaluate_loop_fallthrough(local_data, global_data, part_one, part_two):
@@ -100,6 +103,6 @@ def evaluate_loop_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation))
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Loop
     except:
-        return 1
+        return 1, Operator.Loop

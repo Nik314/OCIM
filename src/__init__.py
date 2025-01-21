@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 
 
 
-def object_centric_inductive_miner(local_data, global_data):
+def object_centric_inductive_miner(local_data, global_data, brute_force = False):
 
     if len(local_data.alphabet) == 1:
         return LeafNode(local_data.alphabet[0],global_data.related,
@@ -24,7 +24,10 @@ def object_centric_inductive_miner(local_data, global_data):
 
     partition, operator = find_strict_cut(local_data, global_data)
     if operator is None:
-        partition, operator = detect_fallthrough_fitness_polynomial(local_data,global_data)
+        if not brute_force:
+            partition, operator = detect_fallthrough_fitness_polynomial(local_data,global_data)
+        else:
+            partition, operator = detect_fallthrough_fitness_brute_force(local_data,global_data)
 
     print(partition,operator)
     print("##############################################################################")
