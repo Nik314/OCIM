@@ -60,7 +60,7 @@ def apply(file_path):
 
 
 if __name__ == "__main__":
-    apply("../data/running-example.jsonocel")
+    print(str(apply("../data/recruiting.jsonocel")))
 
 
 
