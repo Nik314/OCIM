@@ -88,7 +88,7 @@ div, con, rel = get_interaction_patterns([example_log])
 #clos = get_transitive_closure_follows_relation([example_log])
 #detect_concurrent_cut([example_log],dfgs,clos,rel,div)
 
-print_result(object_centric_inductive_miner([example_log], div, rel))
+print_result(object_centric_inductive_miner([example_log], div, rel,example_log["ocel:oid"].unique()))
 
 exit()
 

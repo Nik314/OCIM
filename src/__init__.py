@@ -5,6 +5,7 @@ from OCIM.src.follows_relations import *
 from OCIM.src.cut_detection import *
 from OCIM.src.fallthrough_detection import *
 from OCIM.src.tau_cases import *
+from OCIM.src.oc_process_trees import *
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -18,7 +19,7 @@ def split_log(relation, partition):
 
 
 
-def object_centric_inductive_miner(oc_log_list, divergence, realted, object_set):
+def object_centric_inductive_miner(oc_log_list, div, rel, object_set):
 
     alphabet = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
     dfgs = get_cummulative_directly_follows_relation(oc_log_list)
@@ -34,7 +35,7 @@ def object_centric_inductive_miner(oc_log_list, divergence, realted, object_set)
     print(result)
     print("##############################################################################")
 
-    sublogs = split_log(relation_frames[0],result[0])
+    sublogs = split_log(oc_log_list[0],result[0])
     subtrees = [object_centric_inductive_miner([log], div, rel, object_set) for log in sublogs]
     return (str(result[1]), subtrees)
 
