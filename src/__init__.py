@@ -6,6 +6,9 @@ from OCIM.src.cut_detection import *
 from OCIM.src.fallthrough_detection import *
 from OCIM.src.tau_cases import *
 from OCIM.src.oc_process_trees import *
+from OCIM.src.log_splitting import *
+from OCIM.src.common_data import *
+
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -13,24 +16,11 @@ warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 
 
 
+def object_centric_inductive_miner(local_data, global_data):
 
-def split_log(relation, partition):
-    return [relation[relation["ocel:activity"].isin(part)] for part in partition]
-
-
-
-def object_centric_inductive_miner(oc_log_list, div, rel, object_set):
-
-    alphabet = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
-    dfgs = get_cummulative_directly_follows_relation(oc_log_list)
-    clos = get_transitive_closure_follows_relation(oc_log_list)
-
-    if len(alphabet) == 1:
-        return alphabet[0]
-
-    result = find_strict_cut(oc_log_list,dfgs,clos,rel,div)
+    result = find_strict_cut(local_data, global_data)
     if result is None:
-        result = detect_fallthrough_fitness_polynomial(oc_log_list,dfgs,clos,rel,div)
+        result = detect_fallthrough_fitness_polynomial(local_data,global_data)
 
     print(result)
     print("##############################################################################")
@@ -41,34 +31,18 @@ def object_centric_inductive_miner(oc_log_list, div, rel, object_set):
 
 
 
+def apply(file_path):
+    input_log = pm4py.read_ocel(file_path).relations
+    global_data = GlobalData([input_log])
+    local_data = LocalData([input_log])
+    return object_centric_inductive_miner(local_data, global_data)
 
-def print_result(result, depth = 0):
 
-    indent = ""
-    for i in range(0,depth):
-        indent += "\t"
-
-    if isinstance(result,tuple):
-
-        print(indent + result[0].split(" ")[1].split("_")[1] + "\n")
-        for entry in result[1]:
-            print_result(entry, depth+1)
-
-    else:
-        print(indent + result + "\n")
 
 
 
 if __name__ == "__main__":
-    import time
-    print("Start Miner")
-    start = time.time()
-    relations = pm4py.read_ocel("../data/p2p.jsonocel").relations
-    div, con, rel = get_interaction_patterns([relations])
-    result = object_centric_inductive_miner([relations], div, rel, relations["ocel:oid"].unique())
-    print_result(result)
-    print(time.time()-start)
-
+    apply("../data/running-example.jsonocel")
 
 
 

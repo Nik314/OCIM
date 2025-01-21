@@ -5,16 +5,16 @@ from auxillary_methods import *
 
 
 
-def get_transitive_closure_partition_relations(partition_list, dfgs, div, rel):
-    partition_relation = get_partition_follows_relations(partition_list, dfgs, div, rel)
+def get_transitive_closure_partition_relations(local_data, global_data, partition):
+    partition_relation = get_partition_follows_relations(local_data, global_data, partition)
     return networkx.transitive_closure(networkx.DiGraph(partition_relation), reflexive=False).edges()
 
 
 
-def get_partition_follows_relations(partition_list, dfgs, div, rel):
-    return [(i,j) for i in range(len(partition_list))
-            for j in range(len(partition_list)) if any([dfgs[ot][0].get((a,b)) for a in partition_list[i]
-        for b in partition_list[j] for ot in get_non_divergent_types(a,b,partition_list[i]+partition_list[j],div,rel)]) and i != j]
+def get_partition_follows_relations(local_data, global_data, partition):
+    return [(i,j) for i in range(len(partition))
+            for j in range(len(partition)) if any([local_data.dfgs[ot][0].get((a,b)) for a in partition[i]
+        for b in partition[j] for ot in get_non_divergent_types(a,b,partition[i]+partition[j],global_data)]) and i != j]
 
 
 

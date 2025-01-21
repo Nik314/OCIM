@@ -11,81 +11,78 @@ from scipy.sparse.csgraph import connected_components
 import networkx
 
 
-def detect_distance_concurrent(a,b,dfgs,rel):
+def detect_distance_concurrent(local_data, global_data, a, b):
     if a == b: return 0.0
-    total = sum([2 for ot in rel[a] & rel[b]])
-    correct = sum([1 if dfgs[ot][0].get((a,b),0) else 0 for ot in rel[a] & rel[b]])
-    correct += sum([1 if dfgs[ot][0].get((b,a),0) else 0 for ot in rel[a] & rel[b]])
+    total = sum([2 for ot in global_data.related[a] & global_data.related[b]])
+    correct = sum([1 if local_data.dfgs[ot][0].get((a,b),0) else 0 for ot in global_data.related[a] & global_data.related[b]])
+    correct += sum([1 if local_data.dfgs[ot][0].get((b,a),0) else 0 for ot in global_data.related[a] & global_data.related[b]])
     try:
         return correct / total
     except:
         return 1
 
 
-def detect_fallthrough_concurrent(relations, dfgs, clos, rel, div):
+def detect_fallthrough_concurrent(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
-    distances = [[detect_distance_concurrent(a,b,dfgs,rel) for a in alphabet] for b in alphabet]
+    distances = [[detect_distance_concurrent(local_data,global_data,a,b) for a in local_data.alphabet] for b in local_data.alphabet]
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
-    part_one = [alphabet[i] for i in range(0,len(alphabet)) if kmeans.labels_[i] == 0]
-    part_two = [alphabet[i] for i in range(0,len(alphabet)) if kmeans.labels_[i] == 1]
-    return evaluate_concurrent_fallthrough(part_one,part_two,dfgs,clos,rel,div),[part_one, part_two]
+    part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
+    part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
+    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two]
 
 
 
-def detect_distance_exclusive(part_one,part_two,dfgs,rel,div):
+def detect_distance_exclusive(local_data, global_data, part_one,part_two):
     if part_one == part_two: return 0.0
-    total = sum([2 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,div,rel)])
-    correct = sum([1 if dfgs[ot][0].get((a,b),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,div,rel) ])
-    correct += sum([1 if dfgs[ot][0].get((b,a),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,div,rel)])
+    total = sum([2 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data)])
+    correct = sum([1 if local_data.dfgs[ot][0].get((a,b),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data) ])
+    correct += sum([1 if local_data.dfgs[ot][0].get((b,a),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data)])
     return correct / total
 
 
-def detect_fallthrough_exclusive(relations, dfgs, clos, rel, div):
+def detect_fallthrough_exclusive(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
-    edges = [[1 if a==b or any(dfgs[ot][0].get((a,b),0) or dfgs[ot][0].get((b,a),0)
-            for ot in get_non_divergent_types(a,b,alphabet,div, rel))
-            else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or any(local_data.dfgs[ot][0].get((a,b),0) or local_data.dfgs[ot][0].get((b,a),0)
+            for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data))
+            else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
         return -1, None
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-    distances = [[detect_distance_exclusive(p1,p2,dfgs,rel,div) for p1 in partition] for p2 in partition]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    distances = [[detect_distance_exclusive(local_data, global_data, p1,p2) for p1 in partition] for p2 in partition]
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
     part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
-    return evaluate_xor_fallthrough(part_one,part_two,dfgs,clos,rel,div),[part_one, part_two]
+    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two),[part_one, part_two]
 
 
 
-def detect_fallthrough_sequence(relations, dfgs, clos, rel, div):
+def detect_fallthrough_sequence(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
-    edges = [[1 if a==b or any((clos[ot].get((a,b),0) and clos[ot].get((b,a),0))
-            for ot in get_non_divergent_types(a,b,alphabet,div, rel))
-            else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or any((local_data.clos[ot].get((a,b),0) and local_data.clos[ot].get((b,a),0))
+            for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data))
+            else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
         return -1, None
 
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-    partition_follows = get_transitive_closure_partition_relations(partition,dfgs,div,rel)
-    edges = [[1 if a==b or edges[alphabet.index(b)][alphabet.index(a)] or any([(i,j) in partition_follows and (j,i) in partition_follows
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition_follows = get_transitive_closure_partition_relations(local_data,global_data,partition)
+    edges = [[1 if a==b or edges[local_data.alphabet.index(b)][local_data.alphabet.index(a)] or any([(i,j) in partition_follows and (j,i) in partition_follows
             for i in range(0,len(partition)) for j in range(0,len(partition)) if a in partition[i] and b in partition[j]])
-            else 0 for a in alphabet] for b in alphabet]
+            else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
         return -1, None
 
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(partition,dfgs,div,rel)))]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
     best_score, best_partition = -1, None
 
     for i in range(1, len(partition)-1):
         part_one = sum([partition[j] for j in range(0,i)],[])
         part_two = sum([partition[j] for j in range(i,len(partition))],[])
-        score = evaluate_sequence_fallthrough(part_one,part_two,dfgs,clos,rel,div)
+        score = evaluate_sequence_fallthrough(local_data,global_data,part_one,part_two)
         if score >= best_score:
             best_score = score
             best_partition = [part_one,part_two]
@@ -96,27 +93,23 @@ def detect_fallthrough_sequence(relations, dfgs, clos, rel, div):
 
 
 
-def detect_loop_pair(relation_frames, dfgs, clos, rel,div, a,b):
+def detect_loop_pair(local_data, global_data, a, b):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
 
-    for ot in rel[a] & rel[b]:
-        if (dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0)) and (dfgs[ot][1].get(b,0) or dfgs[ot][2].get(b,0)):
+    for ot in global_data.divergence[a] & global_data.divergence[b]:
+        if (local_data.dfgs[ot][1].get(a,0) or local_data.dfgs[ot][2].get(a,0)) and (local_data.dfgs[ot][1].get(b,0) or local_data.dfgs[ot][2].get(b,0)):
             return True
-        if (dfgs[ot][0].get((a, b), 0) and not dfgs[ot][2].get(a,0) and not dfgs[ot][1].get(b,0)
-            and ot not in get_divergent_types(a, b, alphabet, div, rel)):
+        if (local_data.dfgs[ot][0].get((a, b), 0) and not local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][1].get(b,0)
+            and ot not in get_divergent_types(a, b, local_data.alphabet, global_data)):
             return True
 
     return False
 
 
-def detect_fallthrough_loop(relations, dfgs, clos, rel, div):
+def detect_fallthrough_loop(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
-    object_types = list(set(sum([list(frame["ocel:type"].unique()) for frame in relations],[])))
-
-    edges = [[1 if a==b or detect_loop_pair(relations, dfgs, clos, rel, div, a,b)
-            else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or detect_loop_pair(local_data, global_data, a, b)
+            else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     if n_components == 1:
         return -1, None
@@ -124,24 +117,24 @@ def detect_fallthrough_loop(relations, dfgs, clos, rel, div):
     best_partition, best_score = None, -1
     body,redo = set(), set()
 
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-    for ot in object_types:
-        if not any(ot in rel[a] and ot not in div[a] for a in alphabet):
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    for ot in local_data.object_types:
+        if not any(ot in global_data.related[a] and ot not in global_data.divergence[a] for a in local_data.alphabet):
             continue
 
         i = 0
         for i in range(0,n_components):
-            if any(dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0) for a in partition[i]):
+            if any(local_data.dfgs[ot][1].get(a,0) or local_data.dfgs[ot][2].get(a,0) for a in partition[i]):
                 body = partition[i]
                 break
 
         for j in range(0,n_components):
-            if i != j and any([ot in rel[a] for a in partition[j]]):
+            if i != j and any([ot in global_data.related[a] for a in partition[j]]):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
-                if is_loop_fallthrough_valid(relations,[body,redo],dfgs,clos,rel,div) and body and redo:
-                    if evaluate_loop_fallthrough(body,redo, dfgs,clos,rel,div) > best_score:
-                        best_score = evaluate_loop_fallthrough(body,redo, dfgs,clos,rel,div)
+                if is_loop_fallthrough_valid(local_data,global_data,body,redo) and body and redo:
+                    if evaluate_loop_fallthrough(local_data,global_data,body,redo) > best_score:
+                        best_score = evaluate_loop_fallthrough(local_data,global_data,body,redo)
                         best_partition = [body,redo]
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
@@ -151,31 +144,15 @@ def detect_fallthrough_loop(relations, dfgs, clos, rel, div):
 
 
 
-def detect_fallthrough_fitness_polynomial(relations, dfgs, clos, rel, div):
+def detect_fallthrough_fitness_polynomial(local_data, global_data):
 
     print("Fall Through Detection Triggered")
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
     best_score,best_partition, best_operator = 0.00, None, None
 
-    score, partition = detect_fallthrough_concurrent(relations,dfgs,clos,rel,div)
-    print(score,partition)
-    if score >= best_score:
-        best_score, best_partition, best_operator = score, partition, evaluate_concurrent_fallthrough
-
-    score, partition = detect_fallthrough_exclusive(relations,dfgs,clos,rel,div)
-    print(score,partition)
-    if score >= best_score:
-        best_score, best_partition, best_operator = score, partition, evaluate_xor_fallthrough
-
-    score, partition = detect_fallthrough_sequence(relations,dfgs,clos,rel,div)
-    print(score,partition)
-    if score >= best_score:
-        best_score, best_partition, best_operator = score, partition, evaluate_sequence_fallthrough
-
-    score, partition = detect_fallthrough_loop(relations,dfgs,clos,rel,div)
-    print(score,partition)
-    if score >= best_score:
-        best_score, best_partition, best_operator = score, partition, evaluate_loop_fallthrough
+    for check in [detect_fallthrough_loop, detect_fallthrough_exclusive, detect_fallthrough_concurrent, detect_fallthrough_sequence]:
+        score, partition = check(local_data, global_data)
+        if score >= best_score:
+            best_score, best_partition, best_operator = score, partition, check
 
     return best_partition, best_operator
 
@@ -184,46 +161,45 @@ def detect_fallthrough_fitness_polynomial(relations, dfgs, clos, rel, div):
 
 
 
-def detect_fallthrough_fitness_brute_force(relations, dfgs, clos, rel, div):
+def detect_fallthrough_fitness_brute_force(local_data, global_data):
 
     print("Fall Through Detection Triggered (Brute Force)")
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relations],[])))
     best_score,best_partition, best_operator = 0.00, None, None
 
-    for partition in mit.set_partitions(alphabet, 2):
+    for partition in mit.set_partitions(local_data.alphabet, 2):
 
         for check in [evaluate_xor_fallthrough, evaluate_concurrent_fallthrough]:
 
-            if check == evaluate_concurrent_fallthrough and not is_exclusive_fallthrough_valid(relations, partition, dfgs,clos, rel, div):
+            if check == evaluate_concurrent_fallthrough and not is_exclusive_fallthrough_valid(local_data,global_data, partition):
                 continue
-            if check == evaluate_concurrent_fallthrough and not is_concurrent_fallthrough_valid(relations, partition,dfgs, clos, rel, div):
+            if check == evaluate_concurrent_fallthrough and not is_concurrent_fallthrough_valid(local_data,global_data, partition):
                 continue
 
-            score = check(partition[0],partition[1],dfgs,clos,rel,div)
+            score = check(local_data,global_data,partition[0],partition[1])
             if score >= best_score:
                 best_score, best_partition, best_operator = score, partition, check
 
 
         for check in [evaluate_sequence_fallthrough, evaluate_loop_fallthrough]:
 
-            if check == evaluate_sequence_fallthrough and not is_sequence_fallthrough_valid(relations, partition, dfgs,clos, rel, div):
+            if check == evaluate_sequence_fallthrough and not is_sequence_fallthrough_valid(local_data,global_data, partition):
                 continue
-            if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(relations, partition,dfgs, clos, rel, div):
+            if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(local_data,global_data, partition):
                 continue
 
-            score = check(partition[0],partition[1],dfgs,clos,rel,div)
+            score = check(local_data,global_data,partition[0],partition[1])
             if score >= best_score:
                 best_score, best_partition, best_operator = score, partition, check
 
         partition = list(reversed(partition))
         for check in [evaluate_sequence_fallthrough, evaluate_loop_fallthrough]:
 
-                if check == evaluate_sequence_fallthrough and not is_sequence_fallthrough_valid(relations, partition, dfgs, clos, rel, div):
+                if check == evaluate_sequence_fallthrough and not is_sequence_fallthrough_valid(local_data,global_data, partition):
                     continue
-                if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(relations, partition, dfgs,clos, rel, div):
+                if check == evaluate_loop_fallthrough and not is_loop_fallthrough_valid(local_data,global_data, partition):
                     continue
 
-                score = check(partition[0], partition[1], dfgs, clos, rel, div)
+                score = check(local_data, global_data, partition[0], partition[1])
                 if score >= best_score:
                     best_score, best_partition, best_operator = score, partition, check
 

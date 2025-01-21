@@ -12,92 +12,98 @@ with the same name in the paper (Algorithm 4,5,6,7 for concurrent, choice, seque
 
 
 
-def find_strict_cut(oc_log_list, dfgs, clos, rel, div):
+def find_strict_cut(local_data, global_data):
     for check in [find_cut_sequence,find_cut_exclusive,find_cut_concurrent,find_cut_loop]:
-        partition = check(oc_log_list, dfgs, clos, rel, div)
+        partition = check(local_data, global_data)
         if partition:
             return (partition, check)
 
 
 
-def check_concurrent(relation_frames, dfgs, rel, a, b, alphabet):
-    for ot in rel[a] & rel[b]:
-        if not (dfgs[ot][0].get((a,b),0) and dfgs[ot][0].get((b,a),0)):
+def check_concurrent(local_data, global_data, a,b):
+    for ot in global_data.related[a] & global_data.related[b]:
+        if not (local_data.dfgs[ot][0].get((a,b),0) and local_data.dfgs[ot][0].get((b,a),0)):
             return True
-        if (dfgs[ot][1].get(a,0) and not dfgs[ot][1].get(b,0) and
-                b in get_projected_start(relation_frames,[c for c in alphabet if c != a])[ot]):
+        if (local_data.dfgs[ot][1].get(a,0) and not local_data.dfgs[ot][1].get(b,0) and
+                b in get_projected_start(local_data,[c for c in local_data.alphabet if c != a])[ot]):
             return True
-        if (dfgs[ot][2].get(a,0) and not dfgs[ot][2].get(b,0) and
-                b in get_projected_end(relation_frames,[c for c in alphabet if c != a])[ot]):
+        if (local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][2].get(b,0) and
+                b in get_projected_end(local_data,[c for c in local_data.alphabet if c != a])[ot]):
             return True
     return False
 
 
-def find_cut_concurrent(oc_log_list, dfgs, clos, rel, div):
+def find_cut_concurrent(local_data, global_data):
 
-    alphabet = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
-    edges = [[1 if a==b or check_concurrent(oc_log_list,dfgs,rel,a,b,alphabet)
-                   or check_concurrent(oc_log_list,dfgs,rel,b,a,alphabet)
-              else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or check_concurrent(local_data, global_data, a,b)
+                   or check_concurrent(local_data, global_data, a,b)
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
+
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
         return None
 
-    if is_concurrent_cut_valid(oc_log_list,partition,dfgs,clos,rel,div):
+    if is_concurrent_cut_valid(local_data,global_data,partition):
         return partition
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
 
 
-def check_exclusive_1(oc_log_list, dfgs, rel, div, a, b, alphabet):
-    for ot in rel[a] & rel[b]:
-        if dfgs[ot][0].get((a,b),0) or dfgs[ot][0].get((b,a),0) and ot not in div[a] & div[b]:
+def check_exclusive_1(local_data, global_data, a, b):
+    for ot in global_data.related[a] & global_data.related[b]:
+        if (local_data.dfgs[ot][0].get((a,b),0) or local_data.dfgs[ot][0].get((b,a),0) and
+                ot not in global_data.divergence[a] & global_data.divergence[b]):
             return True
-        if bool(dfgs[ot][0].get((a,b),0)) != bool(dfgs[ot][0].get((b,a),0)) and ot in div[a] & div[b]:
+        if (bool(local_data.dfgs[ot][0].get((a,b),0)) != bool(local_data.dfgs[ot][0].get((b,a),0))
+                and ot in global_data.divergence[a] & global_data.divergence[b]):
             return True
-        if (dfgs[ot][1].get(a,0) and not dfgs[ot][1].get(b,0) and
-                b in get_projected_start(oc_log_list,[c for c in alphabet if c != a])[ot]):
+        if (local_data.dfgs[ot][1].get(a,0) and not local_data.dfgs[ot][1].get(b,0) and
+                b in get_projected_start(local_data,[c for c in local_data.alphabet if c != a])[ot]):
             return True
-        if (dfgs[ot][2].get(a,0) and not dfgs[ot][2].get(b,0) and
-                b in get_projected_end(oc_log_list,[c for c in alphabet if c != a])[ot]):
+        if (local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][2].get(b,0) and
+                b in get_projected_end(local_data,[c for c in local_data.alphabet if c != a])[ot]):
             return True
     return False
 
-def check_exclusive_2(dfgs, rel, div, sigma_i, sigma_j):
+
+def check_exclusive_2(local_data, global_data, sigma_i, sigma_j):
 
     for a in sigma_i:
         for b in sigma_j:
-            for ot in get_divergent_types(a,b,sigma_j+sigma_i,div,rel):
-                if not dfgs[ot][0].get((a,b),0) or not dfgs[ot][0].get((b,a),0):
+            for ot in get_divergent_types(a,b,sigma_j+sigma_i,global_data):
+                if not local_data.dfgs[ot][0].get((a,b),0) or not local_data.dfgs[ot][0].get((b,a),0):
                     return True
 
-    if all(len(get_non_divergent_types(a,b,sigma_j+sigma_i,div,rel)) == 0 for a in sigma_i for b in sigma_j):
+    if all(len(get_non_divergent_types(a,b,sigma_j+sigma_i,global_data)) == 0 for a in sigma_i for b in sigma_j):
         return True
 
     return False
 
 
-def find_cut_exclusive(relation_frames, dfgs, clos, rel, div):
+def find_cut_exclusive(local_data,global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-    edges = [[1 if a==b or check_exclusive_1(relation_frames,dfgs,rel,div,a,b,alphabet)
-              else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b)
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-
-    edges = [[1 if a==b or check_exclusive_1(relation_frames,dfgs,rel,div,a,b,alphabet)
-            or check_exclusive_2(dfgs,rel,div, [p for p in partition if a in p][0],[p for p in partition if b in p][0])
-            else 0 for a in alphabet] for b in alphabet]
-    n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
         return None
 
-    if is_exclusive_cut_valid(relation_frames,partition,dfgs,clos,rel,div):
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b)
+            or check_exclusive_2(local_data,global_data,
+            [p for p in partition if a in p][0], [p for p in partition if b in p][0])
+            else 0 for a in local_data.alphabet] for b in local_data.alphabet]
+    n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+
+    if len(partition) == 1:
+        return None
+
+    if is_exclusive_cut_valid(local_data,global_data,partition):
         return partition
 
     print("Invalid Exclusive Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
@@ -105,11 +111,11 @@ def find_cut_exclusive(relation_frames, dfgs, clos, rel, div):
 
 
 
-def check_sequence_1(clos, rel, div, a, b):
-    for ot in get_non_divergent_types(a,b,[a,b],div,rel):
-        if clos[ot].get((a,b),0) and clos[ot].get((b,a),0):
+def check_sequence_1(local_data, global_data, a, b):
+    for ot in get_non_divergent_types(a,b,[a,b],global_data):
+        if local_data.clos[ot].get((a,b),0) and local_data.clos[ot].get((b,a),0):
             return True
-        if not clos[ot].get((a,b),0) and not clos[ot].get((b,a),0):
+        if not local_data.clos[ot].get((a,b),0) and not local_data.clos[ot].get((b,a),0):
             return True
     return False
 
@@ -122,115 +128,108 @@ def check_sequence_2(partition_closure, i, j):
     return False
 
 
-def check_sequence_3(partition, i, j,div, rel, dfgs):
+def check_sequence_3(local_data, global_data, partition, i, j):
     if i > j:
         j,i = i,j
     for a in partition[i]:
         for b in partition[j]:
-            for ot in get_divergent_types(a,b,sum([partition[k] for k in range(i,j+1)],[]),div,rel):
-                if not dfgs[ot][0].get((a,b),0) or not dfgs[ot][0].get((b,a),0):
+            for ot in get_divergent_types(a,b,sum([partition[k] for k in range(i,j+1)],[]),global_data):
+                if not local_data.dfgs[ot][0].get((a,b),0) or not local_data.dfgs[ot][0].get((b,a),0):
                     print(ot,a,b)
                     return True
     return False
 
 
-def find_cut_sequence(relation_frames, dfgs, clos, rel, div):
+def find_cut_sequence(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-    edges = [[1 if a==b or check_sequence_1(clos,rel,div,a,b)
-              else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or check_sequence_1(local_data, global_data, a,b)
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
         return None
 
-    partition_closure = get_transitive_closure_partition_relations(partition,dfgs,div,rel)
-    edges = [[1 if a==b or check_sequence_1(clos,rel,div,a,b) or check_sequence_2(partition_closure,
+    partition_closure = get_transitive_closure_partition_relations(local_data,global_data,partition)
+    edges = [[1 if a==b or check_sequence_1(local_data, global_data, a, b) or check_sequence_2(partition_closure,
             [i for i in range(0,len(partition)) if a in partition[i]][0],
             [i for i in range(0,len(partition)) if b in partition[i]][0])
-              else 0 for a in alphabet] for b in alphabet]
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
         return None
 
-    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(partition,dfgs,div,rel)))]
-    partition_closure = get_transitive_closure_partition_relations(partition,dfgs,div,rel)
-    edges = [[1 if a==b or check_sequence_1(clos,rel,div,a,b) or check_sequence_2(partition_closure,
+    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
+    partition_closure = get_transitive_closure_partition_relations(local_data,global_data,partition)
+    edges = [[1 if a==b or check_sequence_1(local_data,global_data,a,b) or check_sequence_2(partition_closure,
             [i for i in range(0,len(partition)) if a in partition[i]][0],
-            [i for i in range(0,len(partition)) if b in partition[i]][0]) or check_sequence_3(partition,
+            [i for i in range(0,len(partition)) if b in partition[i]][0]) or check_sequence_3(local_data,global_data, partition,
             [i for i in range(0,len(partition)) if a in partition[i]][0],
-            [i for i in range(0,len(partition)) if b in partition[i]][0], div, rel, dfgs)
-              else 0 for a in alphabet] for b in alphabet]
+            [i for i in range(0,len(partition)) if b in partition[i]][0])
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
-    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(partition,dfgs,div,rel)))]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
 
     if len(partition) == 1:
         return None
 
-    if is_sequence_cut_valid(relation_frames,partition,dfgs,clos,rel,div):
+    if is_sequence_cut_valid(local_data,global_data,partition):
         return partition
 
     print("Invalid Seqeunce Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
 
 
-def check_loop(relation_frames, dfgs, clos, rel,div, a,b):
-
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-
-    for ot in rel[a] & rel[b]:
-        if (not dfgs[ot][0].get((a,b),0) or not dfgs[ot][0].get((b,a),0) and
-                ot not in get_divergent_types(a,b,alphabet,div,rel)):
+def check_loop(local_data, global_data, a,b):
+    for ot in global_data.related[a] & global_data.related[b]:
+        if (not local_data.dfgs[ot][0].get((a,b),0) or not local_data.dfgs[ot][0].get((b,a),0) and
+                ot not in get_divergent_types(a,b, local_data.alphabet, global_data)):
             return True
-        if (dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0)) and (dfgs[ot][1].get(b,0) or dfgs[ot][2].get(b,0)):
+        if (local_data.dfgs[ot][1].get(a,0) or local_data.dfgs[ot][2].get(a,0)) and (local_data.dfgs[ot][1].get(b,0) or local_data.dfgs[ot][2].get(b,0)):
             return True
-        if (dfgs[ot][0].get((a, b), 0) and not dfgs[ot][2].get(a,0) and not dfgs[ot][1].get(b,0)
-            and ot not in get_divergent_types(a, b, alphabet, div, rel)):
+        if (local_data.dfgs[ot][0].get((a, b), 0) and not local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][1].get(b,0)
+            and ot not in get_divergent_types(a, b, local_data.alphabet, global_data)):
             return True
 
     return False
 
-def find_cut_loop(relation_frames, dfgs, clos, rel, div):
 
+def find_cut_loop(local_data, global_data):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-    object_types = list(set(sum([list(frame["ocel:type"].unique()) for frame in relation_frames],[])))
-
-    for a in alphabet:
-        for b in alphabet:
-            for ot in get_non_divergent_types(a,b,alphabet,div,rel):
-                if not clos[ot].get((a,b),0) or not clos[ot].get((b,a),0):
+    for a in local_data.alphabet:
+        for b in local_data.alphabet:
+            for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data):
+                if not local_data.clos[ot].get((a,b),0) or not local_data.clos[ot].get((b,a),0):
                     return None
 
-    edges = [[1 if a==b or check_loop(relation_frames,dfgs,clos,rel,div,a,b)
-              else 0 for a in alphabet] for b in alphabet]
+    edges = [[1 if a==b or check_loop(local_data, global_data, a, b)
+              else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
-    partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
+    partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
     if len(partition) == 1:
         return None
 
     body,redo = set(),set()
 
-    for ot in object_types:
-        if not any(ot in rel[a] and ot not in div[a] for a in alphabet):
+    for ot in local_data.object_types:
+        if not any(ot in global_data.related[a] and ot not in global_data.divergence[a] for a in local_data.alphabet):
             continue
 
         i = 0
         for i in range(0,n_components):
-            if any(dfgs[ot][1].get(a,0) or dfgs[ot][2].get(a,0) for a in partition[i]):
+            if any(local_data.dfgs[ot][1].get(a,0) or local_data.dfgs[ot][2].get(a,0) for a in partition[i]):
                 body = partition[i]
                 break
 
         for j in range(0,n_components):
-            if i != j and any([ot in rel[a] for a in partition[j]]):
+            if i != j and any([ot in global_data.related[a] for a in partition[j]]):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
-                if is_loop_cut_valid(relation_frames,[body,redo],dfgs,clos,rel,div):
+                if is_loop_cut_valid(local_data, global_data, [body,redo]):
                     return [body,redo]
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
