@@ -84,12 +84,3 @@ for ot in example_log["ocel:type"].unique():
 from OCIM.src import *
 print(str(object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))))
 exit()
-
-print(is_loop_cut_valid([example_log], [["identify"],["reject"]],dfgs,clos,rel,div))
-print(is_concurrent_cut_valid([example_log], [["identify"],["reject"]],dfgs,clos,rel,div))
-exit()
-
-from OCIM.src import object_centric_inductive_miner, print_result
-
-result = object_centric_inductive_miner(example_log, div, rel)
-print_result(result)

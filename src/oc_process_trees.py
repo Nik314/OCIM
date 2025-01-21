@@ -24,8 +24,13 @@ class LeafNode:
         indent = ""
         for i in range(0, depth):
             indent += "\t"
-        return indent + self.activity + "\n"
 
+        result = indent + self.activity + "\n"
+        result += indent + "\t Related Types: " + str(self.related) +"\n"
+        result += indent + "\t Divergent Types: " + str(self.divergent) +"\n"
+        result += indent + "\t Convergent Types: " + str(self.convergent) +"\n"
+        result += indent + "\t Deficient Types: " + str(self.deficient) +"\n"
+        return result
 
 
 class OperatorNode:

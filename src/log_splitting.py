@@ -5,11 +5,11 @@ from oc_process_trees import *
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 
+
 def split_log(local_data, partition, operator):
 
     if operator.value in ["->","X","||"]:
         return [LocalData([log[log["ocel:activity"].isin(part)] for log in local_data.oc_log_list]) for part in partition if part]
-
 
     result = [[] for part in partition]
     for log in local_data.oc_log_list:

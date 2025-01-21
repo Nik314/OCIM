@@ -52,4 +52,4 @@ def get_interaction_patterns(relation_frames):
             if matches.max() > 1:
                 divergent_object_types[activity].add(object_type)
 
-    return divergent_object_types,convergent_object_types,related_object_types
+    return divergent_object_types,convergent_object_types,related_object_types, deficient_object_types

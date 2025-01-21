@@ -29,8 +29,9 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
         return OperatorNode(operator, subtrees)
 
     if len(local_data.alphabet) == 1:
-        return LeafNode(local_data.alphabet[0],global_data.related,
-            global_data.divergence,global_data.convergence,None)
+        return LeafNode(local_data.alphabet[0],global_data.related[local_data.alphabet[0]],
+            global_data.divergence[local_data.alphabet[0]],global_data.convergence[local_data.alphabet[0]],
+                        global_data.deficiency[local_data.alphabet[0]])
 
     partition, operator = find_strict_cut(local_data, global_data)
     if operator is None:
