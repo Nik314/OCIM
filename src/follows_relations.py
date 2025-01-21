@@ -18,14 +18,14 @@ def get_partition_follows_relations(partition_list, dfgs, div, rel):
 
 
 
-def get_transitive_closure_follows_relation(relation_frames):
+def get_transitive_closure_follows_relation(oc_log_list):
 
     result = {}
-    object_types = set(sum([list(frame["ocel:type"].unique()) for frame in relation_frames],[]))
-    activities = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
+    object_types = set(sum([list(log["ocel:type"].unique()) for log in oc_log_list],[]))
+    activities = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
 
     for ot in object_types:
-        sub_frames = [frame[frame["ocel:type"] == ot] for frame in relation_frames]
+        sub_frames = [log[log["ocel:type"] == ot] for log in oc_log_list]
         dfgs = [pm4py.discover_directly_follows_graph(sub_frame, "ocel:activity", "ocel:timestamp", "ocel:oid") for sub_frame in sub_frames]
         dfg = {(a,b):sum([graph[0].get((a,b),0) for graph in dfgs]) for a in activities for b in activities}
 
@@ -36,14 +36,14 @@ def get_transitive_closure_follows_relation(relation_frames):
     return result
 
 
-def get_cummulative_directly_follows_relation(relation_frames):
+def get_cummulative_directly_follows_relation(oc_log_list):
 
     result = {}
-    object_types = set(sum([list(frame["ocel:type"].unique()) for frame in relation_frames],[]))
-    activities = set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[]))
+    object_types = set(sum([list(log["ocel:type"].unique()) for log in oc_log_list],[]))
+    activities = set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[]))
 
     for ot in object_types:
-        sub_frames = [frame[frame["ocel:type"] == ot] for frame in relation_frames]
+        sub_frames = [log[log["ocel:type"] == ot] for log in oc_log_list]
         dfgs = [pm4py.discover_directly_follows_graph(sub_frame, "ocel:activity", "ocel:timestamp", "ocel:oid") for sub_frame in sub_frames]
         dfg = {(a,b):sum([graph[0].get((a,b),0) for graph in dfgs]) for a in activities for b in activities}
         start = {a:sum([graph[1].get(a,0) for graph in dfgs]) for a in activities}

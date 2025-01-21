@@ -12,25 +12,11 @@ with the same name in the paper (Algorithm 4,5,6,7 for concurrent, choice, seque
 
 
 
-def find_strict_cut(relation_frames, dfgs, clos, rel, div):
-
-    sequence = find_cut_sequence(relation_frames, dfgs, clos, rel, div)
-    if sequence:
-        return (sequence, is_sequence_cut_valid)
-
-    exclusive = find_cut_exclusive(relation_frames, dfgs, clos, rel, div)
-    if exclusive:
-        return (exclusive, is_exclusive_cut_valid)
-
-    loop = find_cut_loop(relation_frames, dfgs, clos, rel, div)
-    if loop:
-        return (loop, is_loop_cut_valid)
-
-    concurrent = find_cut_concurrent(relation_frames,dfgs,clos,rel,div)
-    if concurrent:
-        return (concurrent, is_concurrent_cut_valid)
-
-    return None
+def find_strict_cut(oc_log_list, dfgs, clos, rel, div):
+    for check in [find_cut_sequence,find_cut_exclusive,find_cut_concurrent,find_cut_loop]:
+        partition = check(oc_log_list, dfgs, clos, rel, div)
+        if partition:
+            return (partition, check)
 
 
 
@@ -47,11 +33,11 @@ def check_concurrent(relation_frames, dfgs, rel, a, b, alphabet):
     return False
 
 
-def find_cut_concurrent(relation_frames, dfgs, clos, rel, div):
+def find_cut_concurrent(oc_log_list, dfgs, clos, rel, div):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-    edges = [[1 if a==b or check_concurrent(relation_frames,dfgs,rel,a,b,alphabet)
-                   or check_concurrent(relation_frames,dfgs,rel,b,a,alphabet)
+    alphabet = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
+    edges = [[1 if a==b or check_concurrent(oc_log_list,dfgs,rel,a,b,alphabet)
+                   or check_concurrent(oc_log_list,dfgs,rel,b,a,alphabet)
               else 0 for a in alphabet] for b in alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[alphabet[i] for i in range(0,len(alphabet)) if labels[i] == n] for n in range(0,n_components)]
@@ -59,24 +45,24 @@ def find_cut_concurrent(relation_frames, dfgs, clos, rel, div):
     if len(partition) == 1:
         return None
 
-    if is_concurrent_cut_valid(relation_frames,partition,dfgs,clos,rel,div):
+    if is_concurrent_cut_valid(oc_log_list,partition,dfgs,clos,rel,div):
         return partition
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
 
 
-def check_exclusive_1(relation_frames, dfgs, rel, div, a, b, alphabet):
+def check_exclusive_1(oc_log_list, dfgs, rel, div, a, b, alphabet):
     for ot in rel[a] & rel[b]:
         if dfgs[ot][0].get((a,b),0) or dfgs[ot][0].get((b,a),0) and ot not in div[a] & div[b]:
             return True
         if bool(dfgs[ot][0].get((a,b),0)) != bool(dfgs[ot][0].get((b,a),0)) and ot in div[a] & div[b]:
             return True
         if (dfgs[ot][1].get(a,0) and not dfgs[ot][1].get(b,0) and
-                b in get_projected_start(relation_frames,[c for c in alphabet if c != a])[ot]):
+                b in get_projected_start(oc_log_list,[c for c in alphabet if c != a])[ot]):
             return True
         if (dfgs[ot][2].get(a,0) and not dfgs[ot][2].get(b,0) and
-                b in get_projected_end(relation_frames,[c for c in alphabet if c != a])[ot]):
+                b in get_projected_end(oc_log_list,[c for c in alphabet if c != a])[ot]):
             return True
     return False
 

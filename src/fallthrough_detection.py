@@ -83,8 +83,8 @@ def detect_fallthrough_sequence(relations, dfgs, clos, rel, div):
     best_score, best_partition = -1, None
 
     for i in range(1, len(partition)-1):
-        part_one = sum(partition[j] for j in range(0,i))
-        part_two = sum(partition[j] for j in range(i,len(partition)))
+        part_one = sum([partition[j] for j in range(0,i)],[])
+        part_two = sum([partition[j] for j in range(i,len(partition))],[])
         score = evaluate_sequence_fallthrough(part_one,part_two,dfgs,clos,rel,div)
         if score >= best_score:
             best_score = score

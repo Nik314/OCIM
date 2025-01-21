@@ -13,9 +13,9 @@ def get_divergent_types(a, b, context_activities, div, rel):
         all(ot not in rel[c] or ot in div[c] for c in context_activities)]
 
 
-def get_projected_start(relation_frames, partition_part):
-    object_types = set(sum([list(frame["ocel:type"].unique()) for frame in relation_frames],[]))
-    filtered_frames = [frame[frame["ocel:activity"].isin(partition_part)] for frame in relation_frames]
+def get_projected_start(oc_log_list, partition_part):
+    object_types = set(sum([list(log["ocel:type"].unique()) for log in oc_log_list],[]))
+    filtered_frames = [log[log["ocel:activity"].isin(partition_part)] for log in oc_log_list]
     return {ot:sum([list(pm4py.get_start_activities(frame[frame["ocel:type"]==ot],activity_key="ocel:activity",case_id_key="ocel:oid",
         timestamp_key="ocel:timestamp").keys()) for frame in filtered_frames
         if frame[frame["ocel:type"]==ot].shape[0]],[]) for ot in object_types}

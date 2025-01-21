@@ -4,6 +4,7 @@ from OCIM.src.cut_definition import *
 from OCIM.src.follows_relations import *
 from OCIM.src.cut_detection import *
 from OCIM.src.fallthrough_detection import *
+from OCIM.src.tau_cases import *
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
@@ -17,24 +18,24 @@ def split_log(relation, partition):
 
 
 
-def object_centric_inductive_miner(relation_frames, div, rel):
+def object_centric_inductive_miner(oc_log_list, divergence, realted, object_set):
 
-    alphabet = list(set(sum([list(frame["ocel:activity"].unique()) for frame in relation_frames],[])))
-    dfgs = get_cummulative_directly_follows_relation(relation_frames)
-    clos = get_transitive_closure_follows_relation(relation_frames)
+    alphabet = list(set(sum([list(log["ocel:activity"].unique()) for log in oc_log_list],[])))
+    dfgs = get_cummulative_directly_follows_relation(oc_log_list)
+    clos = get_transitive_closure_follows_relation(oc_log_list)
 
     if len(alphabet) == 1:
         return alphabet[0]
 
-    result = find_strict_cut(relation_frames,dfgs,clos,rel,div)
+    result = find_strict_cut(oc_log_list,dfgs,clos,rel,div)
     if result is None:
-        result = detect_fallthrough_fitness_polynomial(relation_frames,dfgs,clos,rel,div)
+        result = detect_fallthrough_fitness_polynomial(oc_log_list,dfgs,clos,rel,div)
 
     print(result)
     print("##############################################################################")
 
     sublogs = split_log(relation_frames[0],result[0])
-    subtrees = [object_centric_inductive_miner([log], div, rel) for log in sublogs]
+    subtrees = [object_centric_inductive_miner([log], div, rel, object_set) for log in sublogs]
     return (str(result[1]), subtrees)
 
 
@@ -61,9 +62,9 @@ if __name__ == "__main__":
     import time
     print("Start Miner")
     start = time.time()
-    relations = pm4py.read_ocel("../data/running-example.jsonocel").relations
+    relations = pm4py.read_ocel("../data/p2p.jsonocel").relations
     div, con, rel = get_interaction_patterns([relations])
-    result = object_centric_inductive_miner([relations], div, rel)
+    result = object_centric_inductive_miner([relations], div, rel, relations["ocel:oid"].unique())
     print_result(result)
     print(time.time()-start)
 
