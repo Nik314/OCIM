@@ -28,7 +28,7 @@ def object_centric_inductive_miner(relation_frames, div, rel):
 
     result = find_strict_cut(relation_frames,dfgs,clos,rel,div)
     if result is None:
-        result = detect_fallthrough_fitness_brute_force(relation_frames,dfgs,clos,rel,div)
+        result = detect_fallthrough_fitness_polynomial(relation_frames,dfgs,clos,rel,div)
 
     print(result)
     print("##############################################################################")

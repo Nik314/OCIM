@@ -30,7 +30,6 @@ def find_strict_cut(relation_frames, dfgs, clos, rel, div):
     if concurrent:
         return (concurrent, is_concurrent_cut_valid)
 
-
     return None
 
 
