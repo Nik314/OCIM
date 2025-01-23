@@ -25,7 +25,7 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
 
         sublogs = split_log(local_data, partition,operator)
         subtrees = [object_centric_inductive_miner(sublogs[0], global_data, brute_force, noise),
-            LeafNode("tau",local_data.object_types,set(),set(),local_data.object_types)]
+            LeafNode("tau",local_data.object_types,local_data.object_types,local_data.object_types,local_data.object_types)]
         return OperatorNode(operator, subtrees)
 
     if len(local_data.alphabet) == 1:
@@ -60,7 +60,7 @@ def apply(file_path):
 
 
 if __name__ == "__main__":
-    print(str(apply("../data/recruiting.jsonocel")))
+    print(str(apply("../data/running-example.jsonocel")))
 
 
 

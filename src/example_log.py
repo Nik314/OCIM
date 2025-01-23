@@ -82,5 +82,7 @@ for ot in example_log["ocel:type"].unique():
 #   & \textsc{pay}  &  $\{ \texttt{c}_1, \texttt{o}_4, \texttt{i}_7, \texttt{i}_8, \texttt{i}_9\},$
 
 from OCIM.src import *
-print(str(object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))))
+result = object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))
+print(str(result))
+result.convert_ocpn()
 exit()
