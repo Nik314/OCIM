@@ -1,6 +1,6 @@
-from OCIM.src.auxillary_methods import *
-from OCIM.src.follows_relations import *
-from OCIM.src.interaction_patterns import *
+from auxillary_methods import *
+from follows_relations import *
+from interaction_patterns import *
 
 
 class LocalData:

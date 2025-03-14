@@ -1,8 +1,8 @@
 import operator
 
-from OCIM.src.cut_definition import *
-from OCIM.src.follows_relations import *
-from OCIM.src.oc_process_trees import *
+from cut_definition import *
+from follows_relations import *
+from oc_process_trees import *
 from scipy.sparse import csr_matrix
 
 from scipy.sparse.csgraph import connected_components

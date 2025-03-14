@@ -1,10 +1,10 @@
 import operator
 
-from OCIM.src.fallthrough_definition import *
-from OCIM.src.fallthrough_evaluation import *
-from OCIM.src.auxillary_methods import *
-from OCIM.src.follows_relations import *
-from OCIM.src.oc_process_trees import *
+from fallthrough_definition import *
+from fallthrough_evaluation import *
+from auxillary_methods import *
+from follows_relations import *
+from oc_process_trees import *
 import more_itertools as mit
 import itertools
 import numpy

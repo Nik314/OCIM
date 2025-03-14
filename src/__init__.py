@@ -1,13 +1,13 @@
-from OCIM.src.auxillary_methods import *
-from OCIM.src.interaction_patterns import *
-from OCIM.src.cut_definition import *
-from OCIM.src.follows_relations import *
-from OCIM.src.cut_detection import *
-from OCIM.src.fallthrough_detection import *
-from OCIM.src.tau_cases import *
-from OCIM.src.oc_process_trees import *
-from OCIM.src.log_splitting import *
-from OCIM.src.common_data import *
+from auxillary_methods import *
+from interaction_patterns import *
+from cut_definition import *
+from follows_relations import *
+from cut_detection import *
+from fallthrough_detection import *
+from tau_cases import *
+from oc_process_trees import *
+from log_splitting import *
+from common_data import *
 
 import warnings
 import numpy as np
@@ -57,10 +57,8 @@ def apply(file_path):
 
 
 
-
-
 if __name__ == "__main__":
-    print(str(apply("../data/running-example.jsonocel")))
+    print(str(apply("../data/recruiting.jsonocel")))
 
 
 

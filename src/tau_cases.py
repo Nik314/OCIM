@@ -1,7 +1,7 @@
 import operator
 
-from OCIM.src.cut_definition import *
-from OCIM.src.oc_process_trees import *
+from cut_definition import *
+from oc_process_trees import *
 
 
 

@@ -1,4 +1,4 @@
-from OCIM.src.auxillary_methods import *
+from auxillary_methods import *
 import itertools
 
 """ Methods to check if a cut is strictly valid. This code is not optimized in any way but rather a 1:1 reflection 
