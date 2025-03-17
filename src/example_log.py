@@ -3,7 +3,7 @@ import datetime
 import warnings
 
 
-warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
+#warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 example_log = pandas.DataFrame({"ocel:timestamp":[],"ocel:oid":[],"ocel:type":[],"ocel:activity":[],"ocel:eid":[]})
 
 
@@ -81,7 +81,7 @@ for ot in example_log["ocel:type"].unique():
 #time.sleep(5)
 #   & \textsc{pay}  &  $\{ \texttt{c}_1, \texttt{o}_4, \texttt{i}_7, \texttt{i}_8, \texttt{i}_9\},$
 
-from OCIM.src import *
+from __init__ import *
 result = object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))
 print(str(result))
 result.convert_ocpn()

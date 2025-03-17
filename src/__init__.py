@@ -1,3 +1,5 @@
+import pandas.errors
+
 from auxillary_methods import *
 from interaction_patterns import *
 from cut_definition import *
@@ -10,10 +12,7 @@ from log_splitting import *
 from common_data import *
 
 import warnings
-import numpy as np
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
-
 
 
 def object_centric_inductive_miner(local_data, global_data, brute_force = False, noise = False):
@@ -58,7 +57,9 @@ def apply(file_path):
 
 
 if __name__ == "__main__":
-    print(str(apply("../data/recruiting.jsonocel")))
+    from evaluation_util import *
+    check_stats_latex("../data")
+    #print(str(apply("../data/running-example.jsonocel")))
 
 
 
