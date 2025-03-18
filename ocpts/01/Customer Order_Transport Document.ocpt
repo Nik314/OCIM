@@ -1,0 +1,69 @@
+{'runtime': 20.555377960205078}
+Operator.Sequence
+	Register Customer Order
+		 Related Types: {'Customer Order'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	Operator.Exclusive
+		Create Transport Document
+			 Related Types: {'Customer Order', 'Transport Document'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		tau
+			 Related Types: ['Customer Order', 'Transport Document']
+			 Divergent Types: ['Customer Order', 'Transport Document']
+			 Convergent Types: ['Customer Order', 'Transport Document']
+			 Deficient Types: ['Customer Order', 'Transport Document']
+	Book Vehicles
+		 Related Types: {'Transport Document'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	Operator.Exclusive
+		Order Empty Containers
+			 Related Types: {'Transport Document'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		tau
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']
+	Operator.Exclusive
+		Operator.Loop
+			Operator.Exclusive
+				Operator.Exclusive
+					Depart
+						 Related Types: {'Transport Document'}
+						 Divergent Types: set()
+						 Convergent Types: {'Transport Document'}
+						 Deficient Types: set()
+					tau
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+				Operator.Exclusive
+					Reschedule Container
+						 Related Types: {'Transport Document'}
+						 Divergent Types: set()
+						 Convergent Types: set()
+						 Deficient Types: set()
+					tau
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+			tau
+				 Related Types: ['Transport Document']
+				 Divergent Types: ['Transport Document']
+				 Convergent Types: ['Transport Document']
+				 Deficient Types: ['Transport Document']
+		tau
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']

@@ -49,9 +49,8 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
 
 
 
-def apply(file_path, input_log=None):
-    if input_log is None:
-        input_log = pm4py.read_ocel2(file_path).relations
+def apply(file_path):
+    input_log = pm4py.read_ocel2(file_path).relations
     global_data = GlobalData([input_log])
     local_data = LocalData([input_log])
     return object_centric_inductive_miner(local_data, global_data)
@@ -61,7 +60,7 @@ def apply(file_path, input_log=None):
 if __name__ == "__main__":
 
     from evaluation_util import *
-    determine_runtime_demands("../data","../logs","../models",apply)
+    determine_runtime_demands("../data","../logs", "../ocpns","../ocpts", apply)
     exit()
 
     from ocpa.objects.log.importer.ocel import factory as ocel_import_factory

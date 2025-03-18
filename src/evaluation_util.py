@@ -2,6 +2,7 @@ import os
 from itertools import chain,combinations
 import pm4py
 import pandas
+import time
 
 
 def check_stats_print(dir_path):
@@ -41,8 +42,20 @@ def powerset(iterable):
 	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
 
+def export_ocpn(file_path, ocpn, additional=None):
+	with open(file_path, "w") as text_file:
+		text_file.write(str(additional) + "\n")
+		text_file.write(str(ocpn))
 
-def determine_runtime_demands(dir_path,log_paths,model_path,discovery):
+
+def export_ocpt(file_path, ocpt, additional=None):
+	with open(file_path, "w") as text_file:
+		text_file.write(str(additional) + "\n")
+		text_file.write(str(ocpt))
+
+
+
+def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 	for file in os.listdir(dir_path):
 		print(file)
 		try:
@@ -51,7 +64,12 @@ def determine_runtime_demands(dir_path,log_paths,model_path,discovery):
 			log = pm4py.read_ocel(dir_path+ "/" + file)
 
 		try:
-			os.mkdir(f"{model_path}/{file.split('_')[0]}")
+			os.mkdir(f"{ocpn_path}/{file.split('_')[0]}")
+		except:
+			pass
+
+		try:
+			os.mkdir(f"{ocpt_path}/{file.split('_')[0]}")
 		except:
 			pass
 
@@ -64,9 +82,17 @@ def determine_runtime_demands(dir_path,log_paths,model_path,discovery):
 
 		for object_types in powerset(list(relations["ocel:type"].unique())):
 			if len(object_types) > 1:
-				subrelations = relations[relations["ocel:type"].isin(set(object_types))]
+				print(object_types)
+				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				name = "_".join(object_types).replace(":","")
-				subrelations.to_csv(f"{log_paths}/{file.split('_')[0]}/{name}.csv")
-				print(subrelations)
-				model = discovery(None,subrelations)
-				print(model)
+				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+
+				start = time.time()
+				model = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				runtime = time.time() - start
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
+
+				start = time.time()
+				model = pm4py.discover_oc_petri_net(sublog)
+				runtime = time.time()-start
+				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model , {"runtime":runtime})

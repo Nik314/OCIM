@@ -10,8 +10,6 @@ def detect_tau_cases(local_data, global_data):
         global_data.object_set = local_data.object_set
         return [local_data.alphabet, []], Operator.Exclusive
 
-    print(local_data.alphabet)
-
     for a in local_data.alphabet:
         for b in local_data.alphabet:
             for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data):
