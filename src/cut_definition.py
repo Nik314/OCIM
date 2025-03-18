@@ -89,17 +89,20 @@ def is_sequence_cut_valid(local_data, global_data, partition_list):
                 # for object types that are fully (sequencially) divergent (Section 3.1, Equation 23)
                 for ot in get_divergent_types(a,b,sum([partition_list[k] for k in range(i,j+1)],[]),global_data):
                     if not local_data.dfgs[ot][0].get((a, b), 0) or not local_data.dfgs[ot][0].get((b, a), 0):
+                        print("1")
                         return False
 
                 # check for the one directional transitive connection between activities in different partition parts
                 # for object types that are not fully (sequencially) divergent (Section 3.1, Equation 24)
                 for ot in get_non_divergent_types(a,b,sum([partition_list[k] for k in range(i,j+1)],[]),global_data):
                     if not local_data.clos[ot].get((a, b), 0) or local_data.clos[ot].get((b, a), 0):
+                        print("2")
                         return False
 
     #check if there is at least one non diverging object type between any two
     #partition parts that follow each other (Section 3.1., Equation 25)
-    for (i, j) in itertools.combinations(range(len(partition_list)), 2):
+    for i in range(0,len(partition_list)-1):
+        j = i+1
         if not any(get_non_divergent_types(a,b,partition_list[i]+partition_list[j], global_data)
                for a in partition_list[i] for b in partition_list[j]):
             return False

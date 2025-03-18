@@ -16,7 +16,6 @@ def detect_tau_cases(local_data, global_data):
         for b in local_data.alphabet:
             for ot in get_non_divergent_types(a,b,local_data.alphabet,global_data):
                 if not local_data.clos[ot].get((a,b),0) or not local_data.clos[ot].get((b,a),0):
-                    print("1")
                     return None, None
 
     for ot in local_data.object_types:
@@ -27,7 +26,6 @@ def detect_tau_cases(local_data, global_data):
 
     if not any(ot in global_data.related[a] and a not in global_data.divergence[a]
            for a in local_data.alphabet for ot in local_data.object_types):
-        print("3")
         return None,None
 
     return [local_data.alphabet, []], Operator.Loop

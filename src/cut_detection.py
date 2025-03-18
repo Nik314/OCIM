@@ -185,6 +185,7 @@ def find_cut_sequence(local_data, global_data):
     if is_sequence_cut_valid(local_data,global_data,partition):
         return partition, Operator.Sequence
 
+    print(partition)
     print("Invalid Seqeunce Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
 
 
