@@ -51,7 +51,7 @@ def export_ocpn(file_path, ocpn, additional=None):
 def export_ocpt(file_path, ocpt, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
-		text_file.write(str(ocpt))
+		text_file.write(str(ocpt.get_as_dict()))
 
 
 

@@ -1,0 +1,118 @@
+{'runtime': 644.2605323791504}
+Operator.Concurrent
+	Operator.Sequence
+		Order Empty Containers
+			 Related Types: {'Container'}
+			 Divergent Types: set()
+			 Convergent Types: {'Container'}
+			 Deficient Types: set()
+		Operator.Exclusive
+			Pick Up Empty Container
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Operator.Loop
+				Load Truck
+					 Related Types: {'Container'}
+					 Divergent Types: set()
+					 Convergent Types: set()
+					 Deficient Types: set()
+				tau
+					 Related Types: ['Container']
+					 Divergent Types: ['Container']
+					 Convergent Types: ['Container']
+					 Deficient Types: ['Container']
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Drive to Terminal
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Weigh
+			 Related Types: {'Container'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		Operator.Exclusive
+			Place in Stock
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Bring to Loading Bay
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Reschedule Container
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Load to Vehicle
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+		Operator.Exclusive
+			Depart
+				 Related Types: {'Container'}
+				 Divergent Types: set()
+				 Convergent Types: {'Container'}
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Container']
+				 Divergent Types: ['Container']
+				 Convergent Types: ['Container']
+				 Deficient Types: ['Container']
+	Operator.Sequence
+		Register Customer Order
+			 Related Types: {'Customer Order'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		Create Transport Document
+			 Related Types: {'Customer Order'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()

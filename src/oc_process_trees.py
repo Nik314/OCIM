@@ -58,6 +58,11 @@ class LeafNode:
         result += indent + "\t Deficient Types: " + str(self.deficient) +"\n"
         return result
 
+    def get_as_dict(self):
+        return {"activity":self.activity,"related":self.related,
+                "divergent":self.divergent,"convergent":self.convergent,
+        "deficient":self.deficient}
+
     def get_type_information(self):
         return {(self.activity,"rel"):self.related, (self.activity,"div"):self.divergent,
                 (self.activity,"con"):self.convergent, (self.activity,"def"):self.deficient}
@@ -110,6 +115,9 @@ class OperatorNode:
         for tree in self.subtrees:
             result += tree.__str__(depth+1)
         return result
+
+    def get_as_dict(self):
+        return {"operator":str(self.operator), "subtrees":[subtree.get_as_dict() for subtree in self.subtrees]}
 
     def get_type_information(self):
         return {key:value for subtree in self.subtrees for key,value in subtree.get_type_information().items()}

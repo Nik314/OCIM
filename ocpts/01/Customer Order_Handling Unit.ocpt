@@ -1,0 +1,30 @@
+{'runtime': 32.23089861869812}
+Operator.Concurrent
+	Operator.Sequence
+		Collect Goods
+			 Related Types: {'Handling Unit'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		Load Truck
+			 Related Types: {'Handling Unit'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+	Operator.Sequence
+		Register Customer Order
+			 Related Types: {'Customer Order'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		Operator.Exclusive
+			Create Transport Document
+				 Related Types: {'Customer Order'}
+				 Divergent Types: set()
+				 Convergent Types: set()
+				 Deficient Types: set()
+			tau
+				 Related Types: ['Customer Order']
+				 Divergent Types: ['Customer Order']
+				 Convergent Types: ['Customer Order']
+				 Deficient Types: ['Customer Order']

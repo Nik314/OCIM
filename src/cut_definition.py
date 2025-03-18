@@ -23,7 +23,7 @@ def is_concurrent_cut_valid(local_data,global_data, partition_list):
                 if a in get_projected_start(local_data, partition_list[i])[ot] and not local_data.dfgs[ot][1].get(a,0):
                     return False
 
-    # check for the correct propagation of projected start activities (Section 3.1 , Equation 19)
+    # check for the correct propagation of projected end activities (Section 3.1 , Equation 19)
     for i in range(len(partition_list)):
         for a in partition_list[i]:
             for ot in global_data.related[a]:
