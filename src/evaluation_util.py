@@ -1,6 +1,7 @@
 import os
-
+from itertools import chain,combinations
 import pm4py
+import pandas
 
 
 def check_stats_print(dir_path):
@@ -35,3 +36,37 @@ def check_stats_latex(dir_path):
 
 
 
+def powerset(iterable):
+	s = list(iterable)
+	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+
+
+def determine_runtime_demands(dir_path,log_paths,model_path,discovery):
+	for file in os.listdir(dir_path):
+		print(file)
+		try:
+			log = pm4py.read_ocel2(dir_path+ "/" + file)
+		except:
+			log = pm4py.read_ocel(dir_path+ "/" + file)
+
+		try:
+			os.mkdir(f"{model_path}/{file.split('_')[0]}")
+		except:
+			pass
+
+		try:
+			os.mkdir(f"{log_paths}/{file.split('_')[0]}")
+		except:
+			pass
+
+		relations = log.relations
+
+		for object_types in powerset(list(relations["ocel:type"].unique())):
+			if len(object_types) > 1:
+				subrelations = relations[relations["ocel:type"].isin(set(object_types))]
+				name = "_".join(object_types).replace(":","")
+				subrelations.to_csv(f"{log_paths}/{file.split('_')[0]}/{name}.csv")
+				print(subrelations)
+				model = discovery(None,subrelations)
+				print(model)
