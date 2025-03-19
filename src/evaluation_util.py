@@ -108,7 +108,11 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				model = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
 				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model, {"runtime": runtime})
-				precision, fitness = quality_measure_factory.apply(ocpa_log, model)
+				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, model)
+				print(precision)
+				print(fitness)
+				print(timed)
+				print(skipped)
 				exit()
 				#except:
 				#	print("Failure On Log Due To Bug")
