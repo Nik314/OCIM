@@ -86,8 +86,8 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 				name = "_".join(object_types).replace(":","")
 				print(object_types)
-				if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
-					continue
+				#if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
+				#	continue
 				#try:
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")

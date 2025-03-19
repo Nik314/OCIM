@@ -219,7 +219,6 @@ def calculate_single_event(context, binding, object_types, ocpn,id):
     while not index == len(q):
         # For long running event calculations
         if index > 100000:
-            print("Aborting: Timeout single event")
             break
 
         elem = q[index]
@@ -258,7 +257,6 @@ def calculate_single_event(context, binding, object_types, ocpn,id):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
-    print(id)
     return result, times
 
 
@@ -267,7 +265,6 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     ids = [i for i in range(len(context_list))]
-    print(len(context_list))
     result = pool.starmap(calculate_single_event,
                           zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn),ids))
     results = {}
@@ -290,7 +287,6 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
         e_id = row["event_id"]
         context = context_mapping[e_id]
 
-        #check for this stuff here, that might fail it times out, (I guess)
         try:
             en_l_a = en_l[context_to_string(context)]
             en_m_a = en_m[context_to_string(context)]
