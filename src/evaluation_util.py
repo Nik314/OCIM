@@ -1,4 +1,5 @@
 import os
+from csv import excel
 from itertools import chain,combinations
 import pm4py
 import pandas
@@ -82,9 +83,13 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 		for object_types in powerset(list(relations["ocel:type"].unique())):
 			if len(object_types) > 1:
-				print(object_types)
-				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
+
 				name = "_".join(object_types).replace(":","")
+				print(object_types)
+				if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
+					continue
+				#try:
+				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 
 				start = time.time()
@@ -96,3 +101,5 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				model = pm4py.discover_oc_petri_net(sublog)
 				runtime = time.time()-start
 				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model , {"runtime":runtime})
+				#except:
+			#		print("Failure On Log Due To Bug")

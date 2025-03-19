@@ -27,6 +27,8 @@ def find_strict_cut(local_data, global_data):
 
 
 def check_concurrent(local_data, global_data, a,b):
+    if b == "Load to Vehicle" and a == "Weigh":
+        print("Stop")
     for ot in global_data.related[a] & global_data.related[b]:
         if not (local_data.dfgs[ot][0].get((a,b),0) and local_data.dfgs[ot][0].get((b,a),0)):
             return True
@@ -42,7 +44,7 @@ def check_concurrent(local_data, global_data, a,b):
 def find_cut_concurrent(local_data, global_data):
 
     edges = [[1 if a==b or check_concurrent(local_data, global_data, a,b)
-                   or check_concurrent(local_data, global_data, a,b)
+                   or check_concurrent(local_data, global_data, b,a)
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
 
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
@@ -55,6 +57,7 @@ def find_cut_concurrent(local_data, global_data):
         return partition, Operator.Concurrent
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
+    return None, None
 
 
 
@@ -91,7 +94,7 @@ def check_exclusive_2(local_data, global_data, sigma_i, sigma_j):
 
 def find_cut_exclusive(local_data,global_data):
 
-    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b)
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b) or check_exclusive_1(local_data,global_data,b,a)
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
@@ -99,7 +102,7 @@ def find_cut_exclusive(local_data,global_data):
     if len(partition) == 1:
         return None, None
 
-    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b)
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b) or check_exclusive_1(local_data,global_data,b,a)
             or check_exclusive_2(local_data,global_data,
             [p for p in partition if a in p][0], [p for p in partition if b in p][0])
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
@@ -113,7 +116,7 @@ def find_cut_exclusive(local_data,global_data):
         return partition, Operator.Exclusive
 
     print("Invalid Exclusive Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-
+    return None, None
 
 
 
@@ -185,8 +188,8 @@ def find_cut_sequence(local_data, global_data):
     if is_sequence_cut_valid(local_data,global_data,partition):
         return partition, Operator.Sequence
 
-    print("Invalid Seqeunce Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-
+    print("Invalid Sequence Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
+    return None, None
 
 
 def check_loop(local_data, global_data, a,b):
@@ -239,5 +242,5 @@ def find_cut_loop(local_data, global_data):
                     return [body,redo], Operator.Loop
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
-
+                return None, None
 

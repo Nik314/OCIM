@@ -59,6 +59,7 @@ def apply(file_path):
 
 if __name__ == "__main__":
 
+
     from evaluation_util import *
     determine_runtime_demands("../data","../logs", "../ocpns","../ocpts", apply)
     exit()

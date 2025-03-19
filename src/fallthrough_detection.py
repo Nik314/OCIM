@@ -40,7 +40,7 @@ def detect_distance_exclusive(local_data, global_data, part_one,part_two):
     total = sum([2 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data)])
     correct = sum([1 if local_data.dfgs[ot][0].get((a,b),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data) ])
     correct += sum([1 if local_data.dfgs[ot][0].get((b,a),0) else 0 for a in part_one for b in part_two for ot in get_divergent_types(a,b,part_one+part_two,global_data)])
-    return correct / total
+    return correct / total if total else 1.0
 
 
 def detect_fallthrough_exclusive(local_data, global_data):
