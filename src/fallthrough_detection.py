@@ -12,7 +12,8 @@ from sklearn.cluster import KMeans
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 import networkx
-
+import os
+os.environ['OMP_NUM_THREADS'] = '1'
 
 def detect_distance_concurrent(local_data, global_data, a, b):
     if a == b: return 0.0
@@ -143,7 +144,6 @@ def detect_fallthrough_loop(local_data, global_data):
 
 def detect_fallthrough_fitness_polynomial(local_data, global_data):
 
-    print("Fall Through Detection Triggered")
     best_score,best_partition, best_operator = 0.00, None, None
 
     for check in [detect_fallthrough_loop, detect_fallthrough_exclusive, detect_fallthrough_concurrent, detect_fallthrough_sequence]:
@@ -158,7 +158,6 @@ def detect_fallthrough_fitness_polynomial(local_data, global_data):
 
 def detect_fallthrough_fitness_brute_force(local_data, global_data):
 
-    print("Fall Through Detection Triggered (Brute Force)")
     best_score,best_partition, best_operator = 0.00, None, None
 
     for partition in mit.set_partitions(local_data.alphabet, 2):

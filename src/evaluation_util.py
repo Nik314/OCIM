@@ -88,18 +88,18 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				print(object_types)
 				if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
 					continue
-				#try:
-				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
-				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				try:
+					sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
+					pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 
-				start = time.time()
-				model = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
-				runtime = time.time() - start
-				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
+					start = time.time()
+					model = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+					runtime = time.time() - start
+					export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
 
-				start = time.time()
-				model = pm4py.discover_oc_petri_net(sublog)
-				runtime = time.time()-start
-				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model , {"runtime":runtime})
-				#except:
-			#		print("Failure On Log Due To Bug")
+					start = time.time()
+					model,runtime_info = pm4py.discover_oc_petri_net(sublog)
+					runtime = time.time()-start
+					export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model , {"runtime":runtime})
+				except:
+					print("Failure On Log Due To Bug")

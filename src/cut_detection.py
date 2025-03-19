@@ -27,8 +27,6 @@ def find_strict_cut(local_data, global_data):
 
 
 def check_concurrent(local_data, global_data, a,b):
-    if b == "Load to Vehicle" and a == "Weigh":
-        print("Stop")
     for ot in global_data.related[a] & global_data.related[b]:
         if not (local_data.dfgs[ot][0].get((a,b),0) and local_data.dfgs[ot][0].get((b,a),0)):
             return True
@@ -53,8 +51,63 @@ def find_cut_concurrent(local_data, global_data):
     if len(partition) == 1:
         return None, None
 
-    if is_concurrent_cut_valid(local_data,global_data,partition):
-        return partition, Operator.Concurrent
+    while True:
+        if is_concurrent_cut_valid(local_data,global_data,partition):
+            return partition, Operator.Concurrent
+        else:
+
+            start_problems = {}
+
+            for i in range(len(partition)):
+                for a in partition[i]:
+                    for ot in global_data.related[a]:
+                        if a in get_projected_start(local_data, partition[i])[ot] and not local_data.dfgs[ot][
+                            1].get(a, 0):
+                            start_problems[i] = []
+
+            for problem in start_problems.keys():
+                for j in range(len(partition)):
+                    if j == problem:
+                        continue
+
+                    check = True
+                    for a in partition[problem]:
+                        for ot in global_data.related[a]:
+                            if a in get_projected_start(local_data, partition[problem] + partition[j])[ot] and not local_data.dfgs[ot][
+                                1].get(a, 0):
+                                check = False
+
+                    if check:
+                        start_problems[problem].append(j)
+
+            end_problem = {}
+
+            for i in range(len(partition)):
+                for a in partition[i]:
+                    for ot in global_data.related[a]:
+                        if a in get_projected_end(local_data, partition[i])[ot] and not local_data.dfgs[ot][2].get(
+                                a, 0):
+                            end_problem[i] = []
+
+            for problem in end_problem.keys():
+                for j in range(len(partition)):
+                    if j == problem:
+                        continue
+
+                    check = True
+                    for a in partition[problem]:
+                        for ot in global_data.related[a]:
+                            if a in get_projected_end(local_data, partition[problem]+ partition[j])[ot] and not local_data.dfgs[ot][2].get(
+                                    a, 0):
+                                check = False
+
+                    if check:
+                        end_problem[problem].append(j)
+
+            for problem,solutions in start_problems:
+                pass
+
+
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None
