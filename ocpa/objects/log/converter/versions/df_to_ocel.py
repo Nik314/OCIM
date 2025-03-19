@@ -64,7 +64,6 @@ def apply(df: pd.DataFrame, parameters: dict = None) -> ObjectCentricEventLog:
     )
     logging.debug("*" * 128)
     logging.debug(type(objects))
-    logging.debug(_sample_dict(3, objects))
     raw = RawObjectCentricData(
         events=events, objects=objects, obj_event_mapping=obj_event_mapping
     )

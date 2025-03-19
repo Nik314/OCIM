@@ -88,18 +88,28 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				print(object_types)
 				if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
 					continue
-				try:
-					sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
-					pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				#try:
+				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
+				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.xml")
 
-					start = time.time()
-					model = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
-					runtime = time.time() - start
-					export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
+				start = time.time()
+				model,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				runtime = time.time() - start
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
 
-					start = time.time()
-					model,runtime_info = pm4py.discover_oc_petri_net(sublog)
-					runtime = time.time()-start
-					export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model , {"runtime":runtime})
-				except:
-					print("Failure On Log Due To Bug")
+				from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
+				from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
+				from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
+
+				ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('_')[0]}/{name}.xml")
+
+				start = time.time()
+				model = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
+				runtime = time.time()-start
+				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model, {"runtime": runtime})
+				precision, fitness = quality_measure_factory.apply(ocpa_log, model)
+				exit()
+				#except:
+				#	print("Failure On Log Due To Bug")
+

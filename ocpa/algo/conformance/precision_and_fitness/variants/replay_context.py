@@ -1,3 +1,4 @@
+import multiprocessing
 from itertools import combinations
 from collections import Counter
 import time
@@ -177,6 +178,7 @@ def enabled_log_activities(ocel, contexts):
 
 
 def calculate_single_event(context, binding, object_types, ocpn):
+    print("Event Started")
     q = []
     state_binding_set = set()
     initial_node = [{}, binding]
@@ -217,7 +219,7 @@ def calculate_single_event(context, binding, object_types, ocpn):
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 70000:
+        if index > 500000:
             print("Aborting: Timeout single event")
             break
 
@@ -257,13 +259,15 @@ def calculate_single_event(context, binding, object_types, ocpn):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
+    print("Event Done")
     return result, times
 
 
 def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_types):
-    pool = ThreadPool(4)
+    pool = multiprocessing.Pool(24)
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
+    print(len(context_list))
     result = pool.starmap(calculate_single_event,
                           zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn)))
     results = {}
