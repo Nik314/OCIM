@@ -8,7 +8,7 @@ from oc_process_trees import *
 def detect_tau_cases(local_data, global_data):
     if (set(global_data.object_set) - set(local_data.object_set)) & set(sum([list(log[log["ocel:type"].isin(sum([list(global_data.related[a]) for a in local_data.alphabet],[]))]["ocel:oid"].unique()) for log in global_data.oc_log_list], [])):
         global_data.object_set = local_data.object_set
-        return [local_data.alphabet, []], Operator.Exclusive
+        return [local_data.alphabet, []], Operator.XOR
 
     for a in local_data.alphabet:
         for b in local_data.alphabet:
@@ -26,4 +26,4 @@ def detect_tau_cases(local_data, global_data):
            for a in local_data.alphabet for ot in local_data.object_types):
         return None,None
 
-    return [local_data.alphabet, []], Operator.Loop
+    return [local_data.alphabet, []], Operator.LOOP

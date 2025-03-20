@@ -53,7 +53,7 @@ def find_cut_concurrent(local_data, global_data):
 
     while True:
         if is_concurrent_cut_valid(local_data,global_data,partition):
-            return partition, Operator.Concurrent
+            return partition, Operator.PARALLEL
         else:
 
             start_problems = {}
@@ -104,10 +104,8 @@ def find_cut_concurrent(local_data, global_data):
                     if check:
                         end_problem[problem].append(j)
 
-            for problem,solutions in start_problems:
-                pass
-
-
+            print(start_problems)
+            print(end_problem)
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None
@@ -166,7 +164,7 @@ def find_cut_exclusive(local_data,global_data):
         return None, None
 
     if is_exclusive_cut_valid(local_data,global_data,partition):
-        return partition, Operator.Exclusive
+        return partition, Operator.XOR
 
     print("Invalid Exclusive Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None
@@ -239,7 +237,7 @@ def find_cut_sequence(local_data, global_data):
         return None, None
 
     if is_sequence_cut_valid(local_data,global_data,partition):
-        return partition, Operator.Sequence
+        return partition, Operator.SEQUENCE
 
     print("Invalid Sequence Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None
@@ -292,7 +290,7 @@ def find_cut_loop(local_data, global_data):
                 redo = sum([partition[k] for k in range(0,n_components) if k != i],[])
 
                 if is_loop_cut_valid(local_data, global_data, [body,redo]):
-                    return [body,redo], Operator.Loop
+                    return [body,redo], Operator.LOOP
 
                 print("Invalid Loop Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
                 return None, None

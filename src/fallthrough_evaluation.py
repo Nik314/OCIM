@@ -22,9 +22,9 @@ def evaluate_concurrent_fallthrough(local_data, global_data, part_one, part_two)
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Concurrent
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.PARALLEL
     except:
-        return 1, Operator.Concurrent
+        return 1, Operator.PARALLEL
 
 
 def evaluate_xor_fallthrough(local_data, global_data, part_one, part_two):
@@ -45,9 +45,9 @@ def evaluate_xor_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Exclusive
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.XOR
     except:
-        return 1, Operator.Exclusive
+        return 1, Operator.XOR
 
 
 def evaluate_sequence_fallthrough(local_data, global_data, part_one, part_two):
@@ -73,9 +73,9 @@ def evaluate_sequence_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Sequence
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.SEQUENCE
     except:
-        return 1, Operator.Sequence
+        return 1, Operator.SEQUENCE
 
 
 def evaluate_loop_fallthrough(local_data, global_data, part_one, part_two):
@@ -103,6 +103,6 @@ def evaluate_loop_fallthrough(local_data, global_data, part_one, part_two):
                     precision_correct += 1
 
     try:
-        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.Loop
+        return 1- (precision_violation / (precision_correct + precision_violation)), Operator.LOOP
     except:
-        return 1, Operator.Loop
+        return 1, Operator.LOOP

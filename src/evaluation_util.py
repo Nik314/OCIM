@@ -98,6 +98,9 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				runtime = time.time() - start
 				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
 
+				#todo translate ocpt to ocpa ocpn
+				#todo add precision & fitness calculation
+
 				from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
 				from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 				from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory

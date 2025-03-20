@@ -32,7 +32,7 @@ def detect_fallthrough_concurrent(local_data, global_data):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
     part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
-    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.Concurrent
+    return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.PARALLEL
 
 
 
@@ -57,7 +57,7 @@ def detect_fallthrough_exclusive(local_data, global_data):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
     part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
     part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
-    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.Exclusive
+    return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.XOR
 
 
 
@@ -91,7 +91,7 @@ def detect_fallthrough_sequence(local_data, global_data):
             best_score = score
             best_partition = [part_one,part_two]
 
-    return best_score,best_partition, Operator.Sequence
+    return best_score,best_partition, Operator.SEQUENCE
 
 
 def detect_loop_pair(local_data, global_data, a, b):
@@ -138,7 +138,7 @@ def detect_fallthrough_loop(local_data, global_data):
                         best_score, operator = evaluate_loop_fallthrough(local_data,global_data,body,redo)
                         best_partition = [body,redo]
 
-    return best_score, best_partition, Operator.Loop
+    return best_score, best_partition, Operator.LOOP
 
 
 
