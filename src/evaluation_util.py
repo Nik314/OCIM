@@ -104,25 +104,21 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				ocpa.visualization.oc_petri_net.factory.save(
 					ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), "ours.png")
 
-				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, translated_ocpt)
+				precision, fitness, skipped = quality_measure_factory.apply(ocpa_log, translated_ocpt)
 				print("OCPT Results:")
 				print(precision)
 				print(fitness)
-				print(timed)
 				print(skipped)
-				continue
+
 				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
 				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", ocpn, {"runtime": runtime})
 				ocpa.visualization.oc_petri_net.factory.save(ocpa.visualization.oc_petri_net.factory.apply(ocpn), "theirs.png")
 
-				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, ocpn)
+				precision, fitness, skipped = quality_measure_factory.apply(ocpa_log, ocpn)
 				print("OCPN Results")
 				print(precision)
 				print(fitness)
-				print(timed)
 				print(skipped)
-				#except:
-				#	print("Failure On Log Due To Bug")
 

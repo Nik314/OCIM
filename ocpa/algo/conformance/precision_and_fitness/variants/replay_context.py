@@ -283,7 +283,6 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
     prec = []
     fit = []
     skipped = 0
-    timed = 0
 
     for index, row in ocel.log.iterrows():
         e_id = row["event_id"]
@@ -304,7 +303,7 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
             len(set(en_l[context_to_string(context)]).intersection(set(en_m[context_to_string(context)]))) / float(
                 len(en_l[context_to_string(context)])))
     if len(fit) == 0:
-        return 0, skipped, 0, timed
+        return 0, skipped, 0
     if len(prec) == 0:
-        return 0, skipped, sum(fit) / len(fit), timed
-    return sum(prec) / len(prec), skipped, sum(fit) / len(fit), timed
+        return 0, skipped, sum(fit) / len(fit)
+    return sum(prec) / len(prec), skipped, sum(fit) / len(fit)

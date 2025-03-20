@@ -38,6 +38,6 @@ def apply(ocel,ocpn,contexts=None,bindings=None):
     print("Model Enabled Done")
     print(len(en_m))
     print(len(en_l))
-    precision, skipped_events, fitness, timed =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m)
-    return precision, fitness, timed, skipped_events
+    precision, skipped_events, fitness =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m)
+    return precision, fitness, skipped_events
     
