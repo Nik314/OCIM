@@ -261,10 +261,11 @@ def calculate_single_event(context, binding, object_types, ocpn,id):
 
 
 def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_types):
-    pool = multiprocessing.Pool(16)
+    pool = multiprocessing.Pool(12)
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     ids = [i for i in range(len(context_list))]
+    print(len(ids))
     result = pool.starmap(calculate_single_event,
                           zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn),ids))
     results = {}
@@ -291,8 +292,6 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
             en_l_a = en_l[context_to_string(context)]
             en_m_a = en_m[context_to_string(context)]
         except:
-            skipped += 1
-            fit.append(0)
             timed += 1
             continue
 
@@ -300,6 +299,7 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
             skipped += 1
             fit.append(0)
             continue
+
         prec.append(
             len(set(en_l[context_to_string(context)]).intersection(set(en_m[context_to_string(context)]))) / float(
                 len(en_m[context_to_string(context)])))
