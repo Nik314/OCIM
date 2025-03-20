@@ -1,6 +1,8 @@
+from pytz import common_timezones
+
 from ocpa.algo.conformance.precision_and_fitness.variants import replay_context
 import ocpa.algo.conformance.precision_and_fitness.utils as utils
-
+import copy
 
 def apply(ocel,ocpn,contexts=None,bindings=None):
     '''
@@ -30,12 +32,12 @@ def apply(ocel,ocpn,contexts=None,bindings=None):
         contexts, bindings = utils.calculate_contexts_and_bindings(ocel)
 
     print("Context & Binding Done")
-    en_l =  replay_context.enabled_log_activities(ocel.log, contexts)
-    print(en_l)
+    en_l =  replay_context.enabled_log_activities(ocel.log, copy.deepcopy(contexts))
     print("Log Enabled Done")
-    en_m =  replay_context.enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_types)
-    print(en_m)
+    en_m =  replay_context.enabled_model_activities_multiprocessing(copy.deepcopy(contexts), bindings, ocpn, object_types)
     print("Model Enabled Done")
-    precision, skipped_events, fitness, timed =  replay_context.calculate_precision_and_fitness(ocel.log, contexts, en_l, en_m)
+    print(len(en_m))
+    print(len(en_l))
+    precision, skipped_events, fitness, timed =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m)
     return precision, fitness, timed, skipped_events
     

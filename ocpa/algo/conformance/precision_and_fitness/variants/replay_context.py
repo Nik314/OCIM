@@ -177,7 +177,7 @@ def enabled_log_activities(ocel, contexts):
     return en_l
 
 
-def calculate_single_event(context, binding, object_types, ocpn,id):
+def calculate_single_event(context, binding, object_types, ocpn, target_string):
     q = []
     state_binding_set = set()
     initial_node = [{}, binding]
@@ -211,7 +211,7 @@ def calculate_single_event(context, binding, object_types, ocpn,id):
             b[1][ot] = [(ot, o) for o in b[1][ot]]
     [q.append(node) for node in initial_node]
     index = 0
-    context_string_target = context_to_string(context)
+    context_string_target = target_string
     result = (context_string_target, set())
     [state_binding_set.add(
         (state_to_place_counter(elem[0]), len(elem[1]))) for elem in q]
@@ -250,6 +250,7 @@ def calculate_single_event(context, binding, object_types, ocpn,id):
                 continue
             state_binding_set.add(
                 (traditional_state_string, len(updated_binding)))
+
             q.append([state, updated_binding])
             times[4] += time.time() - ti
             # this could be used to get a rough idea of the progress without any communication between processes
@@ -264,10 +265,10 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
     pool = multiprocessing.Pool(12)
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
-    ids = [i for i in range(len(context_list))]
-    print(len(ids))
+    targets = [context_to_string(contexts[i]) for i in contexts.keys()]
     result = pool.starmap(calculate_single_event,
-                          zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn),ids))
+                          zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn),targets))
+
     results = {}
     total_times = numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])
     for (k, v), times in result:
@@ -288,12 +289,8 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
         e_id = row["event_id"]
         context = context_mapping[e_id]
 
-        try:
-            en_l_a = en_l[context_to_string(context)]
-            en_m_a = en_m[context_to_string(context)]
-        except:
-            timed += 1
-            continue
+        en_l_a = en_l[context_to_string(context)]
+        en_m_a = en_m[context_to_string(context)]
 
         if len(en_m[context_to_string(context)]) == 0 or (set(en_l_a).intersection(en_m_a) == set()):
             skipped += 1

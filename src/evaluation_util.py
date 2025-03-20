@@ -110,7 +110,7 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				print(fitness)
 				print(timed)
 				print(skipped)
-
+				continue
 				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
