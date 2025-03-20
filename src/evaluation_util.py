@@ -5,6 +5,12 @@ import pm4py
 import pandas
 import time
 
+from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
+from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
+from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
+
+import ocpa.visualization.oc_petri_net.factory
+from ocpn_conversion import *
 
 def check_stats_print(dir_path):
 	for file in os.listdir(dir_path):
@@ -85,33 +91,34 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 			if len(object_types) > 1:
 
 				name = "_".join(object_types).replace(":","")
-				print(object_types)
-				#if os.path.exists(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
-				#	continue
-				#try:
+
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.xml")
 
-				start = time.time()
-				model,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
-				runtime = time.time() - start
-				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", model, {"runtime": runtime})
-
-				#todo translate ocpt to ocpa ocpn
-				#todo add precision & fitness calculation
-
-				from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
-				from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
-				from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
+				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt, stats)
 
 				ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('_')[0]}/{name}.xml")
+				translated_ocpt = convert_ocpt_to_ocpn(ocpt)
+				ocpa.visualization.oc_petri_net.factory.save(
+					ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), "ours.png")
+
+				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, translated_ocpt)
+				print("OCPT Results:")
+				print(precision)
+				print(fitness)
+				print(timed)
+				print(skipped)
 
 				start = time.time()
-				model = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
+				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
-				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", model, {"runtime": runtime})
-				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, model)
+				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", ocpn, {"runtime": runtime})
+				ocpa.visualization.oc_petri_net.factory.save(ocpa.visualization.oc_petri_net.factory.apply(ocpn), "theirs.png")
+
+				precision, fitness, timed, skipped = quality_measure_factory.apply(ocpa_log, ocpn)
+				print("OCPN Results")
 				print(precision)
 				print(fitness)
 				print(timed)

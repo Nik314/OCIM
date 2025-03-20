@@ -307,7 +307,7 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
             len(set(en_l[context_to_string(context)]).intersection(set(en_m[context_to_string(context)]))) / float(
                 len(en_l[context_to_string(context)])))
     if len(fit) == 0:
-        return 0, skipped, 0
+        return 0, skipped, 0, timed
     if len(prec) == 0:
-        return 0, skipped, sum(fit) / len(fit)
+        return 0, skipped, sum(fit) / len(fit), timed
     return sum(prec) / len(prec), skipped, sum(fit) / len(fit), timed

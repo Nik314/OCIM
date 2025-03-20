@@ -20,6 +20,7 @@ class GlobalData:
         self.oc_log_list = oc_log_list
         start = time.time()
         div, con, rel, defi = get_interaction_patterns(oc_log_list)
+        print(rel)
         property_time = time.time()-start
         self.object_set = list(set(sum([list(log["ocel:oid"].unique()) for log in oc_log_list],[])))
         self.divergence = div

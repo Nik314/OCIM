@@ -37,6 +37,8 @@ class LeafNode:
     def get_object_types(self):
         return set(sum([list(value) for value in self.get_type_information().values()],[]))
 
+    def get_activities(self):
+        return {self.activity}
 
 class OperatorNode:
 
