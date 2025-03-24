@@ -303,9 +303,6 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m, total_tim
             continue
 
         if len(en_m[context_to_string(context)]) == 0 or (set(en_l_a).intersection(en_m_a) == set()):
-            print(context)
-            print(en_l_a)
-            print(en_m_a)
             skipped += 1
             fit.append(0)
             continue
