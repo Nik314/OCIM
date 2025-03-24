@@ -239,6 +239,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
         # This is an approximation technique
         # if binding_possible:
         #    index = len(q)
+
         for (state, update) in state_update_pairs:
             ti = time.time()
             updated_binding = update_binding(elem[1], update)

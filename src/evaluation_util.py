@@ -86,14 +86,9 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 			pass
 
 		relations = log.relations
-		check = False
 		for object_types in powerset(list(relations["ocel:type"].unique())):
 
 			if len(object_types) > 1:
-
-				if not check:
-					check = True
-					continue
 
 				name = "_".join(object_types).replace(":","")
 

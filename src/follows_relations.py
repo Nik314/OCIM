@@ -1,4 +1,3 @@
-import pm4py
 import networkx
 from auxillary_methods import *
 

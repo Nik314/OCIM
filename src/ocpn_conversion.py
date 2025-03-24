@@ -1,24 +1,10 @@
-from jedi.inference.gradual.annotation import infer_return_for_callable
-
-
 from pm4py.objects.process_tree.utils import generic as pt_util
-from oc_process_trees import OperatorNode,LeafNode,Operator
+from oc_process_trees import OperatorNode,LeafNode
 import pm4py
-from pm4py.algo.discovery.inductive import algorithm as inductive_miner
-from pm4py.objects.petri_net.utils.networkx_graph import create_networkx_directed_graph_ret_dict_both_ways
-from pm4py.objects.petri_net.utils.petri_utils import add_arc_from_to
-from pm4py.objects.petri_net.utils.petri_utils import remove_place, remove_transition
 from pm4py.objects.petri_net.obj import PetriNet
-from ocpa.algo.util.util import project_log, project_log_with_object_count
 from ocpa.objects.oc_petri_net.obj import ObjectCentricPetriNet
-from ocpa.objects.log.importer.csv.util import succint_mdl_to_exploded_mdl, clean_frequency, clean_arc_frequency, \
-    clean_normalized_frequency
-import pandas as pd
-import time
-import networkx as nx
 import uuid
-
-from pm4py.objects.process_tree.obj import ProcessTree
+from pm4py.objects.process_tree.obj import ProcessTree,Operator
 
 
 

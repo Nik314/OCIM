@@ -1,5 +1,3 @@
-import operator
-import copy
 from common_data import *
 from oc_process_trees import *
 from scipy.sparse import csr_matrix

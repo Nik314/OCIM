@@ -1,12 +1,7 @@
-import operator
-
-from fallthrough_definition import *
 from fallthrough_evaluation import *
-from auxillary_methods import *
 from follows_relations import *
 from oc_process_trees import *
 import more_itertools as mit
-import itertools
 import numpy
 from sklearn.cluster import KMeans
 from scipy.sparse import csr_matrix

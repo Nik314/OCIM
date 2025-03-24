@@ -1,6 +1,3 @@
-import operator
-
-from auxillary_methods import *
 from fallthrough_definition import *
 from oc_process_trees import *
 
