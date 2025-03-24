@@ -7,7 +7,7 @@ from scipy.sparse.csgraph import connected_components
 def split_log(local_data, partition, operator, global_data):
 
     if operator in [Operator.SEQUENCE,Operator.XOR,Operator.PARALLEL]:
-        return [LocalData([log[log["ocel:activity"].isin(part)] for log in local_data.oc_log_list]) for part in partition if part]
+        return [LocalData([log[log["ocel:activity"].isin(part)] for log in local_data.oc_log_list], expected_objects=local_data.expected_objects) for part in partition if part]
 
     result = [[] for part in partition]
     for log in local_data.oc_log_list:
@@ -31,4 +31,4 @@ def split_log(local_data, partition, operator, global_data):
                 if any (a in sublog["ocel:activity"].unique() for a in partition[i]):
                     result[i].append(sublog)
 
-        return [LocalData(oc_log_list) for oc_log_list in result]
+        return [LocalData(oc_log_list, expected_objects=local_data.expected_objects) for oc_log_list in result]

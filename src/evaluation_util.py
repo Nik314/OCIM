@@ -54,36 +54,34 @@ def export_ocpn(file_path, ocpn, additional=None):
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpn))
 
+	ocpa.visualization.oc_petri_net.factory.save(
+		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpn",".png"))
+
+
 
 def export_ocpt(file_path, ocpt, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpt.get_as_dict()))
 
+	translated_ocpt = convert_ocpt_to_ocpn(ocpt)
+	ocpa.visualization.oc_petri_net.factory.save(
+		ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), file_path.replace(".ocpt",".png"))
 
 
 def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 	for file in os.listdir(dir_path):
-		print(file)
+
 		try:
 			log = pm4py.read_ocel2(dir_path+ "/" + file)
 		except:
 			log = pm4py.read_ocel(dir_path+ "/" + file)
 
-		try:
-			os.mkdir(f"{ocpn_path}/{file.split('_')[0]}")
-		except:
-			pass
-
-		try:
-			os.mkdir(f"{ocpt_path}/{file.split('_')[0]}")
-		except:
-			pass
-
-		try:
-			os.mkdir(f"{log_paths}/{file.split('_')[0]}")
-		except:
-			pass
+		for dir in [log_paths,ocpn_path,ocpn_path]:
+			try:
+				os.mkdir(f"{dir}/{file.split('_')[0]}")
+			except:
+				pass
 
 		relations = log.relations
 		for object_types in powerset(list(relations["ocel:type"].unique())):
@@ -91,35 +89,29 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 			if len(object_types) > 1:
 
 				name = "_".join(object_types).replace(":","")
-
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.xml")
-
-				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
-				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt, stats)
-				print(str(ocpt))
 				ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('_')[0]}/{name}.xml")
-				translated_ocpt = convert_ocpt_to_ocpn(ocpt)
-				ocpa.visualization.oc_petri_net.factory.save(
-					ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), "ours.png")
-
-				precision, fitness, skipped = quality_measure_factory.apply(ocpa_log, translated_ocpt)
-				print("OCPT Results:")
-				print(precision)
-				print(fitness)
-				print(skipped)
-				continue
+				print("Number of process executions: " + str(len(ocpa_log.process_executions)))
+				print("Ratio of process executions to objects: " + str(len(ocpa_log.process_executions) /
+									sublog.relations["ocel:oid"].nunique()))
 
 				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
-				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", ocpn, {"runtime": runtime})
-				ocpa.visualization.oc_petri_net.factory.save(ocpa.visualization.oc_petri_net.factory.apply(ocpn), "theirs.png")
+				precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, ocpn)
+				export_ocpn(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn", ocpn,
+				{"runtime": runtime,"fitness":fitness,"precision":precision,
+				 		"skipped":skipped,"timed":timed,"total":total})
 
-				precision, fitness, skipped = quality_measure_factory.apply(ocpa_log, ocpn)
-				print("OCPN Results")
-				print(precision)
-				print(fitness)
-				print(skipped)
+				print("Switching from ocpn to ocpt")
+				start = time.time()
+				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				runtime = time.time() -start
+				precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, convert_ocpt_to_ocpn(ocpt))
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,
+							{"runtime": runtime, "fitness": fitness, "precision": precision,
+							 "skipped": skipped, "timed": timed, "total": total})
+				print("Fitness of discovered ocpt (should be 1): " +str(fitness))
 

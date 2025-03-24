@@ -31,11 +31,8 @@ def apply(ocel,ocpn,contexts=None,bindings=None):
     if contexts == None or bindings == None:
         contexts, bindings = utils.calculate_contexts_and_bindings(ocel)
 
-    print("Context & Binding Done")
     en_l =  replay_context.enabled_log_activities(ocel.log, copy.deepcopy(contexts))
-    print("Log Enabled Done")
-    en_m =  replay_context.enabled_model_activities_multiprocessing(copy.deepcopy(contexts), bindings, ocpn, object_types)
-    print("Model Enabled Done")
-    precision, skipped_events, fitness =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m)
-    return precision, fitness, skipped_events
+    en_m, total_timed =  replay_context.enabled_model_activities_multiprocessing(copy.deepcopy(contexts), bindings, ocpn, object_types)
+    precision, skipped_events, fitness, timed, total =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m, total_timed)
+    return precision, fitness, skipped_events, timed, total
     

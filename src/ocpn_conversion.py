@@ -11,32 +11,31 @@ from pm4py.objects.process_tree.obj import ProcessTree,Operator
 def project_ocpt(ocpt,object_type):
 
     if isinstance(ocpt,LeafNode):
-        if ocpt.activity == "" or ocpt.activity == "tau" or ocpt.activity is None or object_type not in ocpt.related:
+        if ocpt.activity == "" or object_type not in ocpt.related:
             return ProcessTree()
         return ProcessTree(label=ocpt.activity)
 
     assert isinstance(ocpt,OperatorNode)
-    activities = ocpt.get_activities()
-    type_dict = ocpt.get_type_information()
+    related_activities = set([a for a in ocpt.get_activities()
+        if object_type in ocpt.get_type_information()[(a,"rel")] and a != ""])
 
-    related_activities = set([a for a in activities if object_type in type_dict[(a,"rel")]])
     if not related_activities:
         return ProcessTree()
 
-    if all(object_type in type_dict[(a,"div") or a ==""] for a in related_activities):
+    if all(object_type in ocpt.get_type_information()[(a,"div")] for a in related_activities):
         return ProcessTree(operator=pm4py.objects.process_tree.obj.Operator.LOOP,
             children=[ProcessTree(),ProcessTree(operator=pm4py.objects.process_tree.obj.Operator.XOR,children=
-            [ProcessTree(label=a) for a in related_activities])]) if any(a != "" for a in related_activities) else ProcessTree()
+            [ProcessTree(label=a) for a in related_activities])])
 
     else:
         if ocpt.operator == Operator.PARALLEL or ocpt.operator == Operator.LOOP:
-            return ProcessTree(operator=ocpt.operator,children=[project_ocpt(sub,object_type) for sub in ocpt.subtrees])\
-                if any(a != "" for a in related_activities) else ProcessTree()
+            return ProcessTree(operator=ocpt.operator,children=[project_ocpt(sub,object_type) for sub in ocpt.subtrees])
 
-        diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities() & related_activities and all(
-                    object_type in type_dict[(a,"div")] for a in ocpt.subtrees[i].get_activities() & related_activities)]
-        non_diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities() & related_activities and
-                         i not in diverging]
+        diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities() & related_activities
+            and all(object_type in ocpt.get_type_information()[(a,"div")]
+                    for a in ocpt.subtrees[i].get_activities() & related_activities)]
+        non_diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities()
+            & related_activities and i not in diverging]
         skipped = [i for i in range(0,len(ocpt.subtrees)) if i not in diverging and i not in non_diverging]
 
         if ocpt.operator == Operator.SEQUENCE:
@@ -70,7 +69,7 @@ def project_ocpt(ocpt,object_type):
 
             div_activities = set(sum([list(ocpt.subtrees[i].get_activities() & related_activities) for i in diverging],[]))
             div_activities = {a for a in div_activities if a != ""}
-            optional = any([isinstance(sub,LeafNode) and sub.activity == "" for sub in ocpt.subtrees])
+            optional = any([isinstance(sub,LeafNode) and sub.activity == "" and object_type in sub.related for sub in ocpt.subtrees])
 
             if div_activities:
                 div_subtree = ProcessTree(operator=pm4py.objects.process_tree.obj.Operator.LOOP,
@@ -86,6 +85,14 @@ def project_ocpt(ocpt,object_type):
 
 
 
+
+
+
+
+
+
+
+
 def convert_ocpt_to_ocpn(ocpt):
 
     assert isinstance(ocpt,OperatorNode) or isinstance(ocpt,LeafNode)
@@ -95,6 +102,7 @@ def convert_ocpt_to_ocpn(ocpt):
 
     for ot in ocpt.get_object_types():
         pt = project_ocpt(ocpt,ot)
+        pt = pt_util.reduce_tau_leafs(pt)
         pt = pt_util.fold(pt)
         nets[ot] = pm4py.convert_to_petri_net(pt)
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]

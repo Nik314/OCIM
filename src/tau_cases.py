@@ -1,14 +1,21 @@
-import operator
-
+import pandas
 from cut_definition import *
 from oc_process_trees import *
 
 
-
 def detect_tau_cases(local_data, global_data):
-    if (set(global_data.object_set) - set(local_data.object_set)) & set(sum([list(log[log["ocel:type"].isin(sum([list(global_data.related[a]) for a in local_data.alphabet],[]))]["ocel:oid"].unique()) for log in global_data.oc_log_list], [])):
-        global_data.object_set = local_data.object_set
-        return [local_data.alphabet, []], Operator.XOR
+    if len(local_data.expected_objects) > len(local_data.object_set):
+
+        combined_input = pandas.concat(local_data.oc_log_list)
+        combined_original = pandas.concat(global_data.oc_log_list)
+        missing_objects = [o for o in local_data.expected_objects
+                if o not in combined_input["ocel:oid"].unique()]
+        missing_types = combined_original[combined_original["ocel:oid"].isin(missing_objects)]["ocel:type"].unique()
+        local_data.expected_objects = local_data.object_set
+
+        if any(ot in combined_input["ocel:type"].unique() for ot in missing_types):
+            return [local_data.alphabet, []], Operator.XOR
+
 
     for a in local_data.alphabet:
         for b in local_data.alphabet:

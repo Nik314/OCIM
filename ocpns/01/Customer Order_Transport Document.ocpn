@@ -1,2 +1,2 @@
-{'runtime': 0.06592965126037598}
-<ocpa.objects.oc_petri_net.obj.ObjectCentricPetriNet object at 0x000001DFC78FB9D0>
+{'runtime': 0.06290626525878906, 'fitness': 1.0, 'precision': 0.9985434873075323, 'skipped': 0, 'timed': 141, 'total': 2544}
+<ocpa.objects.oc_petri_net.obj.ObjectCentricPetriNet object at 0x00000243E3347230>

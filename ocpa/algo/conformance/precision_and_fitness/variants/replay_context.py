@@ -115,8 +115,7 @@ def calculate_next_states_on_bindings(ocpn, state, binding, object_types):
                         token_lists = [[z for z in state[x]]
                                        for (x, y) in in_places[ot]]
                         if len(token_lists) != 0:
-                            input_tokens[ot] = set.intersection(
-                                *map(set, token_lists))
+                            input_tokens[ot] = set.intersection(*map(set, token_lists))
                             input_token_combinations[ot] = list(
                                 combinations(input_tokens[ot], 1))
                         else:
@@ -182,6 +181,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     state_binding_set = set()
     initial_node = [{}, binding]
     all_objects = {}
+    skipped = False
     for ot in object_types:
         all_objects[ot] = set()
         for b in binding:
@@ -218,8 +218,8 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 70000:
-            print("Broken")
+        if index > 500:
+            skipped = True
             break
 
         elem = q[index]
@@ -237,7 +237,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
         # for all next states
         # if the binding is possible, go to the end of the queue and append the next state there
         # This is an approximation technique
-        # if binding_possible:
+        #if binding_possible:
         #    index = len(q)
 
         for (state, update) in state_update_pairs:
@@ -252,7 +252,6 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
                 continue
             state_binding_set.add(
                 (traditional_state_string, len(updated_binding)))
-
             q.append([state, updated_binding])
             times[4] += time.time() - ti
             # this could be used to get a rough idea of the progress without any communication between processes
@@ -260,7 +259,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
-    return result, times
+    return result, times, target_string, skipped
 
 
 def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_types):
@@ -273,27 +272,40 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
 
     results = {}
     total_times = numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])
-    for (k, v), times in result:
+    total_timed = []
+    for (k, v), times, target_string, skipped in result:
         total_times += numpy.array(times)
         if k not in results.keys():
             results[k] = set()
         [results[k].add(v_elem) for v_elem in v]
-    return results
+        if skipped:
+            total_timed.append(target_string)
+    return results,total_timed
 
 
-def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
+def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m, total_timed):
     prec = []
     fit = []
     skipped = 0
+    timed = 0
+    total = 0
 
     for index, row in ocel.log.iterrows():
+        total += 1
         e_id = row["event_id"]
         context = context_mapping[e_id]
 
         en_l_a = en_l[context_to_string(context)]
         en_m_a = en_m[context_to_string(context)]
 
+        if context_to_string(context) in total_timed:
+            timed += 1
+            continue
+
         if len(en_m[context_to_string(context)]) == 0 or (set(en_l_a).intersection(en_m_a) == set()):
+            print(context)
+            print(en_l_a)
+            print(en_m_a)
             skipped += 1
             fit.append(0)
             continue
@@ -305,7 +317,7 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m):
             len(set(en_l[context_to_string(context)]).intersection(set(en_m[context_to_string(context)]))) / float(
                 len(en_l[context_to_string(context)])))
     if len(fit) == 0:
-        return 0, skipped, 0
+        return 0, skipped, 0, timed, total
     if len(prec) == 0:
-        return 0, skipped, sum(fit) / len(fit)
-    return sum(prec) / len(prec), skipped, sum(fit) / len(fit)
+        return 0, skipped, sum(fit) / len(fit), timed, total
+    return sum(prec) / len(prec), skipped, sum(fit) / len(fit), timed, total
