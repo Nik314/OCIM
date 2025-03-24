@@ -1,14 +1,9 @@
-import operator
-
 from cut_definition import *
 from follows_relations import *
 from oc_process_trees import *
 from scipy.sparse import csr_matrix
-
 from scipy.sparse.csgraph import connected_components
-
 import networkx
-import more_itertools as mit
 
 """Methods to detect cuts for the object-centric inductive miner in polynomial runtime. Methods are not optimized but 
 rather a 1:1 reflection of the papers section 3.2. Each of the methods below correspond to the pseudocode function 
@@ -104,8 +99,10 @@ def find_cut_concurrent(local_data, global_data):
                     if check:
                         end_problem[problem].append(j)
 
+            print("TODO Edge Case For Start & End Activities For The COncurrent Operator")
             print(start_problems)
             print(end_problem)
+            break
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None

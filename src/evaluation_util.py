@@ -86,9 +86,14 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 			pass
 
 		relations = log.relations
-
+		check = False
 		for object_types in powerset(list(relations["ocel:type"].unique())):
+
 			if len(object_types) > 1:
+
+				if not check:
+					check = True
+					continue
 
 				name = "_".join(object_types).replace(":","")
 
@@ -98,7 +103,7 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt, stats)
-
+				print(str(ocpt))
 				ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('_')[0]}/{name}.xml")
 				translated_ocpt = convert_ocpt_to_ocpn(ocpt)
 				ocpa.visualization.oc_petri_net.factory.save(
@@ -109,6 +114,7 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				print(precision)
 				print(fitness)
 				print(skipped)
+				continue
 
 				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})

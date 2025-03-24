@@ -218,7 +218,8 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 100000:
+        if index > 70000:
+            print("Broken")
             break
 
         elem = q[index]

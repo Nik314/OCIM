@@ -48,7 +48,7 @@ def project_ocpt(ocpt,object_type):
                 if any(a != "" for a in related_activities) else ProcessTree()
 
         diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities() & related_activities and all(
-                    object_type in type_dict[(a,"div")] for a in ocpt.subtrees[i].get_activities() & related_activities) ]
+                    object_type in type_dict[(a,"div")] for a in ocpt.subtrees[i].get_activities() & related_activities)]
         non_diverging = [i for i in range(len(ocpt.subtrees)) if ocpt.subtrees[i].get_activities() & related_activities and
                          i not in diverging]
         skipped = [i for i in range(0,len(ocpt.subtrees)) if i not in diverging and i not in non_diverging]
@@ -84,6 +84,8 @@ def project_ocpt(ocpt,object_type):
 
             div_activities = set(sum([list(ocpt.subtrees[i].get_activities() & related_activities) for i in diverging],[]))
             div_activities = {a for a in div_activities if a != ""}
+            optional = any([isinstance(sub,LeafNode) and sub.activity == "" for sub in ocpt.subtrees])
+
             if div_activities:
                 div_subtree = ProcessTree(operator=pm4py.objects.process_tree.obj.Operator.LOOP,
                             children=[ProcessTree(),
@@ -91,10 +93,10 @@ def project_ocpt(ocpt,object_type):
                                       [ProcessTree(label=a) for a in div_activities])])
 
                 return ProcessTree(operator=Operator.XOR,children=[div_subtree] +
-                    [project_ocpt(ocpt.subtrees[i],object_type) for i in non_diverging])
+                    [project_ocpt(ocpt.subtrees[i],object_type) for i in non_diverging] + ([ProcessTree()] if optional else []))
             else:
                 return ProcessTree(operator=Operator.XOR,children=
-                    [project_ocpt(ocpt.subtrees[i],object_type) for i in non_diverging])
+                    [project_ocpt(ocpt.subtrees[i],object_type) for i in non_diverging] + ([ProcessTree()] if optional else []))
 
 
 
@@ -107,6 +109,7 @@ def convert_ocpt_to_ocpn(ocpt):
 
     for ot in ocpt.get_object_types():
         pt = project_ocpt(ocpt,ot)
+        pt = pt_util.fold(pt)
         nets[ot] = pm4py.convert_to_petri_net(pt)
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
 

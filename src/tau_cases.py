@@ -22,7 +22,7 @@ def detect_tau_cases(local_data, global_data):
                 if local_data.dfgs[ot][2].get(a,0) and local_data.dfgs[ot][1].get(b,0) and not local_data.dfgs[ot][0].get((a,b),0):
                     return None, None
 
-    if not any(ot in global_data.related[a] and a not in global_data.divergence[a]
+    if not any(ot in global_data.related[a] and ot not in global_data.divergence[a]
            for a in local_data.alphabet for ot in local_data.object_types):
         return None,None
 

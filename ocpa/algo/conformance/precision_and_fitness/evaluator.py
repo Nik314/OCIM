@@ -36,8 +36,6 @@ def apply(ocel,ocpn,contexts=None,bindings=None):
     print("Log Enabled Done")
     en_m =  replay_context.enabled_model_activities_multiprocessing(copy.deepcopy(contexts), bindings, ocpn, object_types)
     print("Model Enabled Done")
-    print(len(en_m))
-    print(len(en_l))
     precision, skipped_events, fitness =  replay_context.calculate_precision_and_fitness(ocel.log, copy.deepcopy(contexts), en_l, en_m)
     return precision, fitness, skipped_events
     
