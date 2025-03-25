@@ -16,6 +16,7 @@ def find_strict_cut(local_data, global_data):
     for check in [find_cut_sequence,find_cut_exclusive,find_cut_concurrent,find_cut_loop]:
         partition,operator = check(local_data, global_data)
         if partition:
+            global_data.quality_info["cuts"].append((partition, operator))
             return partition, operator
     return None, None
 

@@ -107,14 +107,15 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 									sublog.relations["ocel:oid"].nunique()))
 
 				start = time.time()
-				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				ocpt,runtime_stats, quality_stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 				runtime = time.time() -start
-				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,{})
+				runtime_stats["total"] = runtime
 				ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
 				precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
 					special_activities), ocpn, special_activities=special_activities)
 				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,
-							{"runtime": runtime, "fitness": fitness, "precision": precision,
+							{"runtime": runtime_stats, "quality":quality_stats,
+							 "fitness": fitness, "precision": precision,
 							 "skipped": skipped, "timed": timed, "total": total})
 				print("Fitness of discovered ocpt (should be 1): " +str(fitness))
 

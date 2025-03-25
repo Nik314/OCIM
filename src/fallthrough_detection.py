@@ -146,6 +146,7 @@ def detect_fallthrough_fitness_polynomial(local_data, global_data):
         if score >= best_score:
             best_score, best_partition, best_operator = score, partition, operator
 
+    global_data.quality_info["cuts"].append((best_partition, best_operator,best_score))
     return best_partition, best_operator
 
 

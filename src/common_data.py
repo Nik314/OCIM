@@ -31,3 +31,4 @@ class GlobalData:
         self.related = rel
         self.deficiency = defi
         self.runtime_info = {"properties":[property_time],"cuts":[],"fallthroughs":[],"taus":[],"splits":[]}
+        self.quality_info = {"cuts":[], "fallthroughs":[]}
