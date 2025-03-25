@@ -1,3 +1,4 @@
+from matplotlib.rcsetup import validate_int
 from pm4py.objects.process_tree.utils import generic as pt_util
 from oc_process_trees import OperatorNode,LeafNode
 import pm4py
@@ -9,6 +10,8 @@ from pm4py.objects.process_tree.obj import ProcessTree,Operator
 
 
 def project_ocpt(ocpt,object_type):
+
+
 
     if isinstance(ocpt,LeafNode):
         if ocpt.activity == "" or object_type not in ocpt.related:
@@ -46,11 +49,11 @@ def project_ocpt(ocpt,object_type):
 
                 if index in diverging:
 
-                    div_activities = ocpt.subtrees[index].get_activities()
+                    div_activities = ocpt.subtrees[index].get_activities() & related_activities
                     while index+1 in diverging and index+1 < len(ocpt.subtrees):
                         index += 1
                         if index not in skipped:
-                            div_activities |= ocpt.subtrees[index].get_activities()
+                            div_activities |= ocpt.subtrees[index].get_activities() & related_activities
 
                     div_activities = {a for a in div_activities if a != ""}
                     div_subtree = ProcessTree(operator=pm4py.objects.process_tree.obj.Operator.LOOP,
@@ -85,11 +88,26 @@ def project_ocpt(ocpt,object_type):
 
 
 
+def handle_deficiency(ocpt):
 
+    if isinstance(ocpt,OperatorNode):
+        subresults = [handle_deficiency(sub) for sub in ocpt.subtrees]
+        return OperatorNode(ocpt.operator,[sub[0] for sub in subresults]),sum([sub[1] for sub in subresults],[])
+    elif ocpt.activity == "":
+        return ocpt,[]
+    else:
+        from itertools import combinations, chain
+        stable_types = ocpt.related - ocpt.deficient
+        variable_types = ocpt.related & ocpt.deficient
+        if variable_types:
+            ot_sets =  [stable_types | {c for c in comb} for comb in chain.from_iterable(combinations(variable_types,n)
+                                    for n in range(len(variable_types)+1))]
 
-
-
-
+            children = [LeafNode(activity=ocpt.activity + "<|>"+str(sorted(list(ots))), related=ots, convergent=ocpt.convergent & ots,
+                        deficient= set(), divergent= ocpt.divergent & ots) for ots in ot_sets]
+            return OperatorNode(operator=Operator.XOR,subtrees=children), [ocpt.activity]
+        else:
+            return ocpt,[]
 
 
 
@@ -99,6 +117,7 @@ def convert_ocpt_to_ocpn(ocpt):
 
     nets = {}
     convergent_activities = {}
+    ocpt, special_activities = handle_deficiency(ocpt)
 
     for ot in ocpt.get_object_types():
         pt = project_ocpt(ocpt,ot)
@@ -170,7 +189,8 @@ def convert_ocpt_to_ocpn(ocpt):
                 t.in_arcs.add(a)
                 arcs.append(a)
             arc_mapping[arc] = a
+
     ocpn = ObjectCentricPetriNet(
         places=set(places), transitions=set(transitions), arcs=set(arcs), nets=nets, place_mapping=place_mapping,
         transition_mapping=transition_mapping, arc_mapping=arc_mapping)
-    return ocpn
+    return ocpn, special_activities

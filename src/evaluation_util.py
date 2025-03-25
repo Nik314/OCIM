@@ -64,9 +64,16 @@ def export_ocpt(file_path, ocpt, additional=None):
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpt.get_as_dict()))
 
-	translated_ocpt = convert_ocpt_to_ocpn(ocpt)
+	translated_ocpt, special = convert_ocpt_to_ocpn(ocpt)
 	ocpa.visualization.oc_petri_net.factory.save(
 		ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), file_path.replace(".ocpt",".png"))
+
+
+def adjusted_log(ocpa_log, affected_activities):
+	ocpa_log.log.log["event_activity"] = ocpa_log.log.log.apply(lambda row:(row["event_activity"] +"<|>"+ str(sorted([ot
+		for ot in ocpa_log.object_types if row[ot]])) if row["event_activity"] in affected_activities
+															else row["event_activity"]),axis=1)
+	return ocpa_log
 
 
 def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
@@ -88,6 +95,8 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 			if len(object_types) > 1:
 
+				print(object_types)
+
 				name = "_".join(object_types).replace(":","")
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
@@ -98,6 +107,20 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 									sublog.relations["ocel:oid"].nunique()))
 
 				start = time.time()
+				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+				runtime = time.time() -start
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,{})
+				ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
+				precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
+					special_activities), ocpn, special_activities=special_activities)
+				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,
+							{"runtime": runtime, "fitness": fitness, "precision": precision,
+							 "skipped": skipped, "timed": timed, "total": total})
+				print("Fitness of discovered ocpt (should be 1): " +str(fitness))
+
+
+				print("Switching from ocpt to ocpn")
+				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 				runtime = time.time()-start
 				precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, ocpn)
@@ -105,13 +128,4 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				{"runtime": runtime,"fitness":fitness,"precision":precision,
 				 		"skipped":skipped,"timed":timed,"total":total})
 
-				print("Switching from ocpn to ocpt")
-				start = time.time()
-				ocpt,stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
-				runtime = time.time() -start
-				precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, convert_ocpt_to_ocpn(ocpt))
-				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,
-							{"runtime": runtime, "fitness": fitness, "precision": precision,
-							 "skipped": skipped, "timed": timed, "total": total})
-				print("Fitness of discovered ocpt (should be 1): " +str(fitness))
 

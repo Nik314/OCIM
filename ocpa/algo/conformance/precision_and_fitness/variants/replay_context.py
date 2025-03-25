@@ -218,7 +218,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 500:
+        if index > 70000:
             skipped = True
             break
 
@@ -237,7 +237,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
         # for all next states
         # if the binding is possible, go to the end of the queue and append the next state there
         # This is an approximation technique
-        #if binding_possible:
+        # if binding_possible:
         #    index = len(q)
 
         for (state, update) in state_update_pairs:
