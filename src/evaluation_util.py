@@ -84,7 +84,7 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 		except:
 			log = pm4py.read_ocel(dir_path+ "/" + file)
 
-		for dir in [log_paths,ocpn_path,ocpn_path]:
+		for dir in [log_paths,ocpn_path,ocpt_path]:
 			try:
 				os.mkdir(f"{dir}/{file.split('_')[0]}")
 			except:
@@ -98,9 +98,14 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 				print(object_types)
 
 				name = "_".join(object_types).replace(":","")
+
+				if os.path.isfile(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
+					continue
+
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.xml")
+
 				ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('_')[0]}/{name}.xml")
 				print("Number of process executions: " + str(len(ocpa_log.process_executions)))
 				print("Ratio of process executions to objects: " + str(len(ocpa_log.process_executions) /
