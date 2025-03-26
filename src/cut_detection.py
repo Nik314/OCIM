@@ -193,7 +193,6 @@ def check_sequence_3(local_data, global_data, partition, i, j):
         for b in partition[j]:
             for ot in get_divergent_types(a,b,sum([partition[k] for k in range(i,j+1)],[]),global_data):
                 if not local_data.dfgs[ot][0].get((a,b),0) or not local_data.dfgs[ot][0].get((b,a),0):
-                    print(ot,a,b)
                     return True
     return False
 

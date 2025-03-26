@@ -1,3 +1,4 @@
+import copy
 import multiprocessing
 from itertools import combinations
 from collections import Counter
@@ -5,6 +6,7 @@ import time
 import itertools
 from itertools import product
 import numpy
+import hashlib
 from multiprocessing.dummy import Pool as ThreadPool
 
 
@@ -19,7 +21,9 @@ def context_to_string_verbose(context):
 
 
 def context_to_string(context):
-    return hash(tuple([hash(tuple(sorted(context[cc].items()))) for cc in context.keys()]))
+    hash_string = str(sorted([(key,entry,counter) for key,value in context.items() for entry,counter in value.items()]))
+    return hashlib.sha256(hash_string.encode("utf-8")).hexdigest()
+    #return hash(tuple([hash(tuple(sorted(context[cc].items()))) for cc in context.keys()]))
     cstr = ""
     for key in context.keys():
         cstr += key
@@ -40,10 +44,12 @@ def model_enabled(model, state, transition):
 
 
 def state_to_place_counter(state):
+
     result = Counter()
     for p in state.keys():
         result += Counter({p.name: len(state[p])})
-    return hash(tuple(sorted(result.items())))
+
+    return hashlib.sha256(str(list(sorted(result.items()))).encode("utf-8")).hexdigest()
 
 
 def binding_possible(ocpn, state, binding, object_types):
@@ -177,6 +183,7 @@ def enabled_log_activities(ocel, contexts):
 
 
 def calculate_single_event(context, binding, object_types, ocpn, target_string):
+
     q = []
     state_binding_set = set()
     initial_node = [{}, binding]
@@ -187,6 +194,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
         for b in binding:
             for o in b[1][ot]:
                 all_objects[ot].add((ot, o))
+
     for color in context.keys():
         tokens = all_objects[color]
         to_be_added = 0
@@ -213,12 +221,15 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     index = 0
     context_string_target = target_string
     result = (context_string_target, set())
+
     [state_binding_set.add(
         (state_to_place_counter(elem[0]), len(elem[1]))) for elem in q]
+
+
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 70000:
+        if index > 3500:
             skipped = True
             break
 
@@ -231,8 +242,10 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
                     result[1].add(t.label)
         times[0] += time.time() - ti
         ti = time.time()
+
         state_update_pairs, binding_possible = calculate_next_states_on_bindings(
             ocpn, elem[0], elem[1], object_types)
+
         times[1] += time.time() - ti
         # for all next states
         # if the binding is possible, go to the end of the queue and append the next state there
@@ -263,12 +276,11 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
 
 
 def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_types):
-    pool = multiprocessing.Pool(12)
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     targets = [context_to_string(contexts[i]) for i in contexts.keys()]
-    result = pool.starmap(calculate_single_event,
-                          zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn),targets))
+    inputs = zip(context_list, binding_list, itertools.repeat(object_types), [copy.deepcopy(ocpn) for i in contexts.keys()],targets)
+    result = multiprocessing.Pool(12).starmap(calculate_single_event,inputs)
 
     results = {}
     total_times = numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])

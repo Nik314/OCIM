@@ -81,7 +81,7 @@ class ObjectCentricPetriNet(object):
             if id(self) in memodict:
                 return memodict[id(self)]
             new_place = ObjectCentricPetriNet.Place(
-                self.name, self.object_type)
+                self.name, self.object_type,initial=self.initial,final=self.final)
             memodict[id(self)] = new_place
             for arc in self.in_arcs:
                 new_arc = deepcopy(arc, memo=memodict)
@@ -89,6 +89,7 @@ class ObjectCentricPetriNet(object):
             for arc in self.out_arcs:
                 new_arc = deepcopy(arc, memo=memodict)
                 new_place.out_arcs.add(new_arc)
+
             return new_place
 
         object_type = property(__get_object_type)
@@ -187,7 +188,7 @@ class ObjectCentricPetriNet(object):
             if id(self) in memodict:
                 return memodict[id(self)]
             new_trans = ObjectCentricPetriNet.Transition(
-                self.name, self.label, properties=self.properties)
+                self.name, self.label, properties=self.properties,silent=self.silent)
             memodict[id(self)] = new_trans
             for arc in self.in_arcs:
                 new_arc = deepcopy(arc, memo=memodict)
