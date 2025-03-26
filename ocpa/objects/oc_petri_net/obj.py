@@ -280,7 +280,7 @@ class ObjectCentricPetriNet(object):
             memodict[id(self.source)] = new_source
             memodict[id(self.target)] = new_target
             new_arc = ObjectCentricPetriNet.Arc(
-                new_source, new_target, weight=self.weight, properties=self.properties)
+                new_source, new_target, weight=self.weight, properties=self.properties,variable=self.variable)
             memodict[id(self)] = new_arc
             return new_arc
         
@@ -309,6 +309,7 @@ class ObjectCentricPetriNet(object):
         self.__transition_mapping = transition_mapping if transition_mapping is not None else dict()
         self.__arc_mapping = arc_mapping if arc_mapping is not None else dict()
         self.__nets = nets if nets is not None else dict()
+
 
     @property
     def name(self):
