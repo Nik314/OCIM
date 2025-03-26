@@ -4,6 +4,8 @@ from ocpa.algo.conformance.precision_and_fitness.variants import replay_context
 import ocpa.algo.conformance.precision_and_fitness.utils as utils
 import copy
 
+
+
 def apply(ocel,ocpn,contexts=None,bindings=None, special_activities=None):
     '''
     Calculation precision and fitness for an object-centric Petri net with respect to an object-centric event log. The

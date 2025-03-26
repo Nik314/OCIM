@@ -184,6 +184,9 @@ def enabled_log_activities(ocel, contexts):
 
 def calculate_single_event(context, binding, object_types, ocpn, target_string):
 
+    import random
+    random.seed = 367450
+
     q = []
     state_binding_set = set()
     initial_node = [{}, binding]
@@ -225,11 +228,10 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     [state_binding_set.add(
         (state_to_place_counter(elem[0]), len(elem[1]))) for elem in q]
 
-
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 3500:
+        if index > 300:
             skipped = True
             break
 
@@ -250,8 +252,8 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
         # for all next states
         # if the binding is possible, go to the end of the queue and append the next state there
         # This is an approximation technique
-        # if binding_possible:
-        #    index = len(q)
+        #if binding_possible:
+        #   index = len(q)
 
         for (state, update) in state_update_pairs:
             ti = time.time()
@@ -272,6 +274,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
+
     return result, times, target_string, skipped
 
 
@@ -279,7 +282,12 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     targets = [context_to_string(contexts[i]) for i in contexts.keys()]
-    inputs = zip(context_list, binding_list, itertools.repeat(object_types), [copy.deepcopy(ocpn) for i in contexts.keys()],targets)
+    inputs = list(zip(context_list, binding_list, itertools.repeat(object_types), [ocpn for i in contexts.keys()],targets))
+
+    #result = []
+    #for i in range(len(context_list)):
+     #   result.append(calculate_single_event(*inputs[i]))
+
     result = multiprocessing.Pool(12).starmap(calculate_single_event,inputs)
 
     results = {}

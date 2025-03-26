@@ -1,3 +1,4 @@
+import copy
 import os
 from csv import excel
 from itertools import chain,combinations
@@ -62,7 +63,8 @@ def export_ocpn(file_path, ocpn, additional=None):
 def export_ocpt(file_path, ocpt, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
-		text_file.write(str(ocpt.get_as_dict()))
+		text_file.write(str(ocpt.get_as_dict()) + "\n")
+		text_file.write(str(ocpt))
 
 	translated_ocpt, special = convert_ocpt_to_ocpn(ocpt)
 	ocpa.visualization.oc_petri_net.factory.save(
@@ -102,8 +104,8 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 				name = "_".join(object_types).replace(":","")
 
-#				if os.path.isfile(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
-#					continue
+				if os.path.isfile(f"{ocpn_path}/{file.split('_')[0]}/{name}.ocpn"):
+					continue
 
 				sublog = pm4py.filter_ocel_object_types(log,object_types,positive=True)
 				pm4py.write_ocel2(sublog,f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
@@ -116,9 +118,11 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 
 				start = time.time()
 				ocpt,runtime_stats, quality_stats = discovery(f"{log_paths}/{file.split('_')[0]}/{name}.jsonocel")
+
 				runtime = time.time() -start
 				runtime_stats["total"] = runtime
 				ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
+
 				precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
 					special_activities), ocpn, special_activities=special_activities)
 				export_ocpt(f"{ocpt_path}/{file.split('_')[0]}/{name}.ocpt", ocpt,
@@ -126,8 +130,6 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 							 "fitness": fitness, "precision": precision,
 							 "skipped": skipped, "timed": timed, "total": total})
 				print("Fitness of discovered ocpt (should be 1): " +str(fitness))
-
-
 				print("Switching from ocpt to ocpn")
 				start = time.time()
 				ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})

@@ -1,2 +1,82 @@
-{'runtime': {'properties': [0.13268351554870605], 'cuts': [0.0011746883392333984, 0.20237994194030762], 'fallthroughs': [], 'taus': [5.7220458984375e-06, 0.032332420349121094, 0.05388236045837402, 4.76837158203125e-06, 0.03165864944458008, 0.031495094299316406, 2.6226043701171875e-06, 0.033789873123168945, 1.1444091796875e-05, 4.76837158203125e-06, 0.019487857818603516, 7.867813110351562e-06, 0.00812530517578125, 8.821487426757812e-06], 'splits': [0.0314021110534668, 0.010226011276245117, 0.005082607269287109, 0.005328655242919922, 0.6337788105010986, 1.1300902366638184, 0.6410307884216309, 0.540412425994873], 'total': 3.690725088119507}, 'quality': {'cuts': [([['Register Customer Order'], ['Create Transport Document'], ['Book Vehicles'], ['Order Empty Containers'], ['Depart', 'Reschedule Container']], ->), ([['Depart'], ['Reschedule Container']], X)], 'fallthroughs': []}, 'fitness': 1.0, 'precision': 0.7073254065873993, 'skipped': 0, 'timed': 105, 'total': 2544}
-{'operator': '->', 'subtrees': [{'activity': 'Register Customer Order', 'related': {'Customer Order'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Create Transport Document', 'related': {'Transport Document', 'Customer Order'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document', 'Customer Order'], 'divergent': ['Transport Document', 'Customer Order'], 'convergent': ['Transport Document', 'Customer Order'], 'deficient': ['Transport Document', 'Customer Order']}]}, {'activity': 'Book Vehicles', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Order Empty Containers', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'activity': 'Depart', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': {'Transport Document'}, 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'activity': 'Reschedule Container', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}
+{'runtime': {'properties': [0.13048362731933594], 'cuts': [0.0010826587677001953, 0.20454907417297363], 'fallthroughs': [], 'taus': [8.106231689453125e-06, 0.03199124336242676, 0.05277824401855469, 3.5762786865234375e-06, 0.031491994857788086, 0.03091883659362793, 3.0994415283203125e-06, 0.03342580795288086, 1.0251998901367188e-05, 7.3909759521484375e-06, 0.019138813018798828, 6.9141387939453125e-06, 0.008083343505859375, 7.3909759521484375e-06], 'splits': [0.03083181381225586, 0.010300874710083008, 0.004990339279174805, 0.005277872085571289, 0.6269161701202393, 1.1137075424194336, 0.632523775100708, 0.5365145206451416], 'total': 3.6486082077026367}, 'quality': {'cuts': [([['Register Customer Order'], ['Create Transport Document'], ['Book Vehicles'], ['Order Empty Containers'], ['Reschedule Container', 'Depart']], ->), ([['Depart'], ['Reschedule Container']], X)], 'fallthroughs': []}, 'fitness': 1.0, 'precision': 0.7073254065873993, 'skipped': 0, 'timed': 105, 'total': 2544}
+{'operator': '->', 'subtrees': [{'activity': 'Register Customer Order', 'related': {'Customer Order'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Create Transport Document', 'related': {'Customer Order', 'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document', 'Customer Order'], 'divergent': ['Transport Document', 'Customer Order'], 'convergent': ['Transport Document', 'Customer Order'], 'deficient': ['Transport Document', 'Customer Order']}]}, {'activity': 'Book Vehicles', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Order Empty Containers', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'activity': 'Depart', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': {'Transport Document'}, 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'activity': 'Reschedule Container', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}
+->
+	Register Customer Order
+		 Related Types: {'Customer Order'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	X
+		Create Transport Document
+			 Related Types: {'Customer Order', 'Transport Document'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['Transport Document', 'Customer Order']
+			 Divergent Types: ['Transport Document', 'Customer Order']
+			 Convergent Types: ['Transport Document', 'Customer Order']
+			 Deficient Types: ['Transport Document', 'Customer Order']
+	Book Vehicles
+		 Related Types: {'Transport Document'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	X
+		Order Empty Containers
+			 Related Types: {'Transport Document'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']
+	X
+		*
+			X
+				X
+					*
+						Depart
+							 Related Types: {'Transport Document'}
+							 Divergent Types: set()
+							 Convergent Types: {'Transport Document'}
+							 Deficient Types: set()
+						
+							 Related Types: ['Transport Document']
+							 Divergent Types: ['Transport Document']
+							 Convergent Types: ['Transport Document']
+							 Deficient Types: ['Transport Document']
+					
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+				X
+					*
+						Reschedule Container
+							 Related Types: {'Transport Document'}
+							 Divergent Types: set()
+							 Convergent Types: set()
+							 Deficient Types: set()
+						
+							 Related Types: ['Transport Document']
+							 Divergent Types: ['Transport Document']
+							 Convergent Types: ['Transport Document']
+							 Deficient Types: ['Transport Document']
+					
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+			
+				 Related Types: ['Transport Document']
+				 Divergent Types: ['Transport Document']
+				 Convergent Types: ['Transport Document']
+				 Deficient Types: ['Transport Document']
+		
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']

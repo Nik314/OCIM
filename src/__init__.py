@@ -12,10 +12,11 @@ from tau_cases import *
 from oc_process_trees import *
 from log_splitting import *
 from common_data import *
-
+import random
 import warnings
 warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 warnings.filterwarnings("ignore",category=DeprecationWarning)
+random.seed = 367450
 
 
 def object_centric_inductive_miner(local_data, global_data, brute_force = False, noise = False):
