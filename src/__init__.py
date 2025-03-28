@@ -35,9 +35,9 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
         return OperatorNode(operator, subtrees)
 
     if len(local_data.alphabet) == 1:
-        total = pandas.concat(local_data.oc_log_list)
-        info = {ot:total[total["ocel:type"] == ot].groupby("ocel:oid").apply(lambda frame:frame["ocel:eid"].nunique()).max() for ot in global_data.related[local_data.alphabet[0]]}
-        loops = {ot for ot in info.keys() if info[ot] > 1}
+
+        info = [{ot:log[log["ocel:type"] == ot].groupby("ocel:oid").apply(lambda frame:frame["ocel:eid"].nunique()).max() for ot in global_data.related[local_data.alphabet[0]]} for log in local_data.oc_log_list]
+        loops = {ot for ot in global_data.related[local_data.alphabet[0]] if any([sub[ot] > 1 for sub in info if isinstance(sub, numpy.int64)] + [False]) and ot not in global_data.divergence[local_data.alphabet[0]]}
 
         if loops:
             return OperatorNode(Operator.LOOP,subtrees=[LeafNode(local_data.alphabet[0], global_data.related[local_data.alphabet[0]],
@@ -73,16 +73,25 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
 
 
 def apply(file_path):
-    input_log = pm4py.read_ocel2(file_path).relations
+    try:
+        input_log = pm4py.read_ocel2(file_path).relations
+    except:
+        input_log = pm4py.read_ocel(file_path).relations
+
+    start = time.time()
     global_data = GlobalData([input_log])
     local_data = LocalData([input_log])
-    return object_centric_inductive_miner(local_data, global_data),global_data.runtime_info, global_data.quality_info
+    result = object_centric_inductive_miner(local_data, global_data),global_data.runtime_info, global_data.quality_info
+    global_data.runtime_info["total"] = time.time() -start
+    return result
 
 
 
 if __name__ == "__main__":
 
     from evaluation_util import *
+    measure_runtime_ocpt("../data", apply)
+    exit()
     determine_runtime_demands("../data","../logs", "../ocpns","../ocpts", apply)
 
 

@@ -12,7 +12,7 @@ def get_transitive_closure_partition_relations(local_data, global_data, partitio
 
 def get_partition_follows_relations(local_data, global_data, partition):
     return [(i,j) for i in range(len(partition))
-            for j in range(len(partition)) if any([local_data.dfgs[ot][0].get((a,b),0) for a in partition[i]
+            for j in range(len(partition)) if any([local_data.clos[ot].get((a,b),0) for a in partition[i] #changed from dfg to clos (bug?)
         for b in partition[j] for ot in get_non_divergent_types(a,b,partition[i]+partition[j],global_data)]) and i != j]
 
 

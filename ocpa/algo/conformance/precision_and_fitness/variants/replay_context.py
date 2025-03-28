@@ -274,7 +274,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
-
+    print("1 Context Done")
     return result, times, target_string, skipped
 
 
@@ -282,11 +282,12 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     targets = [context_to_string(contexts[i]) for i in contexts.keys()]
-    inputs = list(zip(context_list, binding_list, itertools.repeat(object_types), [ocpn for i in contexts.keys()],targets))
+    inputs = list(zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn), targets))
+    print(len(inputs))
 
     #result = []
     #for i in range(len(context_list)):
-     #   result.append(calculate_single_event(*inputs[i]))
+    #   result.append(calculate_single_event(*inputs[i]))
 
     result = multiprocessing.Pool(12).starmap(calculate_single_event,inputs)
 

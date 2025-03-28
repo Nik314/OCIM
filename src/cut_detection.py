@@ -1,3 +1,7 @@
+import operator
+
+from scipy.stats import pareto
+
 from cut_definition import *
 from follows_relations import *
 from oc_process_trees import *
@@ -44,66 +48,85 @@ def find_cut_concurrent(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
+
     if len(partition) == 1:
         return None, None
 
-    while True:
-        if is_concurrent_cut_valid(local_data,global_data,partition):
-            return partition, Operator.PARALLEL
-        else:
+    start_problems = {}
 
-            start_problems = {}
+    for i in range(len(partition)):
+        for a in partition[i]:
+            for ot in global_data.related[a]:
+                if a in get_projected_start(local_data, partition[i])[ot] and not local_data.dfgs[ot][
+                    1].get(a, 0):
+                    start_problems[i] = []
 
-            for i in range(len(partition)):
-                for a in partition[i]:
-                    for ot in global_data.related[a]:
-                        if a in get_projected_start(local_data, partition[i])[ot] and not local_data.dfgs[ot][
-                            1].get(a, 0):
-                            start_problems[i] = []
+    for problem in start_problems.keys():
+        for j in range(len(partition)):
+            if j == problem:
+                continue
 
-            for problem in start_problems.keys():
-                for j in range(len(partition)):
-                    if j == problem:
-                        continue
+            check = True
+            for a in partition[problem] + partition[j]:
+                for ot in global_data.related[a]:
+                    if a in get_projected_start(local_data, partition[problem] + partition[j])[ot] and not local_data.dfgs[ot][
+                        1].get(a, 0):
+                        check = False
 
-                    check = True
-                    for a in partition[problem]:
-                        for ot in global_data.related[a]:
-                            if a in get_projected_start(local_data, partition[problem] + partition[j])[ot] and not local_data.dfgs[ot][
-                                1].get(a, 0):
-                                check = False
+            if check:
+                start_problems[problem].append(j)
 
-                    if check:
-                        start_problems[problem].append(j)
+    end_problem = {}
 
-            end_problem = {}
+    for i in range(len(partition)):
+        for a in partition[i]:
+            for ot in global_data.related[a]:
+                if a in get_projected_end(local_data, partition[i])[ot] and not local_data.dfgs[ot][2].get(
+                        a, 0):
+                    end_problem[i] = []
 
-            for i in range(len(partition)):
-                for a in partition[i]:
-                    for ot in global_data.related[a]:
-                        if a in get_projected_end(local_data, partition[i])[ot] and not local_data.dfgs[ot][2].get(
-                                a, 0):
-                            end_problem[i] = []
+    for problem in end_problem.keys():
+        for j in range(len(partition)):
+            if j == problem:
+                continue
 
-            for problem in end_problem.keys():
-                for j in range(len(partition)):
-                    if j == problem:
-                        continue
+            check = True
+            for a in partition[problem] + partition[j]:
+                for ot in global_data.related[a]:
+                    if a in get_projected_end(local_data, partition[problem]+ partition[j])[ot] and not local_data.dfgs[ot][2].get(
+                            a, 0):
+                        check = False
 
-                    check = True
-                    for a in partition[problem]:
-                        for ot in global_data.related[a]:
-                            if a in get_projected_end(local_data, partition[problem]+ partition[j])[ot] and not local_data.dfgs[ot][2].get(
-                                    a, 0):
-                                check = False
+            if check:
+                end_problem[problem].append(j)
 
-                    if check:
-                        end_problem[problem].append(j)
+    if not start_problems and not end_problem:
+        return partition, Operator.PARALLEL
 
-            print("TODO Edge Case For Start & End Activities For The COncurrent Operator")
-            print(start_problems)
-            print(end_problem)
-            break
+
+    nodes = [i for i in range(len(partition))]
+    edges = [(i,j) for i in nodes for j in nodes if i == j or j in start_problems.get(i,[]) or j in end_problem.get(i,[])]
+    sinks = [i for i in nodes if all(edge[0] != i or edge == (i,i) for edge in edges)]
+
+    if len(sinks) <= 1:
+        return None,None
+
+    else:
+        closure = networkx.transitive_closure(networkx.DiGraph(edges), reflexive=False).edges()
+        assignment = {i:[i] for i in sinks}
+
+        for i in range(len(partition)):
+            if i in assignment.keys():
+                continue
+            for sink in assignment.keys():
+                if (i,sink) in closure:
+                    assignment[sink].append(i)
+                    break
+
+        partition = [sum([partition[i] for i in value],[]) for key,value in assignment]
+
+    if is_concurrent_cut_valid(local_data,global_data,partition):
+        return partition, Operator.PARALLEL
 
     print("Invalid Concurrent Cut Found (Proven To Not be Possible, So Go Find The Bug!) ")
     return None, None
@@ -197,6 +220,36 @@ def check_sequence_3(local_data, global_data, partition, i, j):
     return False
 
 
+def remove_cycles(partition,local_data,global_data):
+
+    partition_closure = get_transitive_closure_partition_relations(local_data,global_data,partition)
+    partition = [list(set(p)) for p in partition]
+    result = []
+    done = []
+    change = False
+
+    for i in range(len(partition)):
+
+        if i in done:
+            continue
+
+        result.append(partition[i])
+        for j in range(i+1, len(partition)):
+
+            if j in done:
+                continue
+
+            if (i,j) in partition_closure and (j,i) in partition_closure:
+                result[-1] += partition[j]
+                done.append(j)
+                change = True
+
+        done.append(i)
+
+    return result, change
+
+
+
 def find_cut_sequence(local_data, global_data):
 
     edges = [[1 if a==b or check_sequence_1(local_data, global_data, a,b)
@@ -228,6 +281,11 @@ def find_cut_sequence(local_data, global_data):
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+
+    change = True
+    while change:
+        partition, change = remove_cycles(partition,local_data,global_data)
+
     partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
 
     if len(partition) == 1:

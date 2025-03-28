@@ -33,6 +33,7 @@ def apply(ocel,ocpn,contexts=None,bindings=None, special_activities=None):
     object_types = ocel.object_types
     if contexts == None or bindings == None:
         contexts, bindings = utils.calculate_contexts_and_bindings(ocel)
+    print("Context Done")
     en_l =  replay_context.enabled_log_activities(ocel.log, copy.deepcopy(contexts))
     en_m, total_timed =  replay_context.enabled_model_activities_multiprocessing(copy.deepcopy(contexts), bindings, ocpn, object_types)
     if special_activities:

@@ -1,11 +1,9 @@
 import pandas
 import datetime
-import warnings
+import pm4py
 
 
-#warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
 example_log = pandas.DataFrame({"ocel:timestamp":[],"ocel:oid":[],"ocel:type":[],"ocel:activity":[],"ocel:eid":[]})
-
 
 events = [
     ("identify",{"C1","E1"}),
@@ -70,19 +68,9 @@ for event in events:
     substring = ", ".join([f"\\texttt{{{str(oid[0]).lower()}}}_{{{oid[1:]}}}" for oid in sorted(list(event[1]))])
     print(f"\\textsc{{{event[0]}}} & $ \\{{{substring}\\}}$ &")
 
-#print(i)
+
 for ot in example_log["ocel:type"].unique():
-    pass
-    #print(ot)
-    #pm4py.view_dfg(pm4py.discover_eventually_follows_graph(example_log[example_log["ocel:type"].isin([ot])],
-    #    activity_key="ocel:activity", timestamp_key="ocel:timestamp",case_id_key="ocel:oid"),{},{})
+    print(ot)
+    pm4py.view_dfg(pm4py.discover_eventually_follows_graph(example_log[example_log["ocel:type"].isin([ot])],
+        activity_key="ocel:activity", timestamp_key="ocel:timestamp",case_id_key="ocel:oid"),{},{})
 
-
-#time.sleep(5)
-#   & \textsc{pay}  &  $\{ \texttt{c}_1, \texttt{o}_4, \texttt{i}_7, \texttt{i}_8, \texttt{i}_9\},$
-
-from __init__ import *
-result = object_centric_inductive_miner(LocalData([example_log]),GlobalData([example_log]))
-print(str(result))
-result.convert_ocpn()
-exit()

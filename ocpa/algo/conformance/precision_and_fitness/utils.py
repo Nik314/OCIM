@@ -1,3 +1,4 @@
+import sys
 from collections import Counter
 import networkx as nx
 
@@ -8,7 +9,6 @@ def calculate_preset(eog):
         #several different ways of calculating
         # USE THIS FOR LARGE EVENT LOGS
         preset[e] = list(nx.ancestors(eog,e))
-
 
         #stable speed also for later events, large logs with large connected components
         #preset[e] = [v for v in nx.dfs_predecessors(EOG, source=e).keys() if v!=e]
@@ -29,6 +29,10 @@ def calculate_contexts_and_bindings(ocel):
     counter_e=0
     for event in preset.keys():
         counter_e+=1
+        if counter_e % 100 == 0:
+            print(counter_e/ len(preset.keys()))
+            print(sys.getsizeof(contexts))
+            print(sys.getsizeof(bindings))
         context = {}
         obs = list(set().union(*log.loc[log["event_id"].isin(preset[event]+[event])]["event_objects"].to_list()))
         binding_sequence = log.loc[log["event_id"].isin(preset[event])].apply(lambda y: (y["event_activity"], { ot : [o for (ot_,o) in y["event_objects"] if ot_ == ot] for ot in object_types}), axis = 1).values.tolist()
