@@ -1,3 +1,5 @@
+import random
+
 from fallthrough_evaluation import *
 from follows_relations import *
 from oc_process_trees import *
@@ -25,8 +27,12 @@ def detect_fallthrough_concurrent(local_data, global_data):
 
     distances = [[detect_distance_concurrent(local_data,global_data,a,b) for a in local_data.alphabet] for b in local_data.alphabet]
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
-    part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
-    part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
+    if len(set(kmeans.labels_)) == 1:
+        part_one = [local_data.alphabet[random.randint(0,len(local_data.alphabet)-1)]]
+        part_two = [a for a in local_data.alphabet if a not in part_one]
+    else:
+        part_one = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 0]
+        part_two = [local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if kmeans.labels_[i] == 1]
     return evaluate_concurrent_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.PARALLEL
 
 
@@ -49,9 +55,15 @@ def detect_fallthrough_exclusive(local_data, global_data):
         return -1, None, None
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
     distances = [[detect_distance_exclusive(local_data, global_data, p1,p2) for p1 in partition] for p2 in partition]
+
     kmeans = KMeans(n_clusters=2, random_state=0).fit(numpy.array(distances))
-    part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
-    part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
+    if len(set(kmeans.labels_)) == 1:
+        return -1, None,None
+
+    else:
+        part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
+        part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
+
     return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.XOR
 
 

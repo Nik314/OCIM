@@ -1,7 +1,5 @@
 import time
 
-from sympy.assumptions import global_assumptions
-
 from auxillary_methods import *
 from interaction_patterns import *
 from cut_definition import *
