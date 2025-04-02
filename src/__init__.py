@@ -88,10 +88,10 @@ def apply(file_path):
 if __name__ == "__main__":
 
     from evaluation_util import *
-    measure_runtime_ocpt("../data", apply)
-    exit()
-    determine_runtime_demands("../data","../logs", "../ocpns","../ocpts", apply)
-
+    experiment_3("../data","../logs", "../ocpts", apply)
+    #plot_experiment_1()
+    #plot_experiment_2()
+    #experiment_1_and_2("../data", apply)
 
 
 

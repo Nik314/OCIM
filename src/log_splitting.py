@@ -7,9 +7,7 @@ from scipy.sparse.csgraph import connected_components
 def split_log(local_data, partition, operator, global_data):
 
     if operator in [Operator.SEQUENCE,Operator.XOR,Operator.PARALLEL]:
-        start = time.time()
         result = [LocalData([log[log["ocel:activity"].isin(part)] for log in local_data.oc_log_list], expected_objects=local_data.expected_objects) for part in partition if part]
-        print(time.time()-start)
         return result
 
     result = [[] for part in partition]

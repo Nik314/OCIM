@@ -1,5 +1,3 @@
-from csv import excel
-
 from follows_relations import *
 from interaction_patterns import *
 import time
@@ -30,5 +28,5 @@ class GlobalData:
         self.convergence = con
         self.related = rel
         self.deficiency = defi
-        self.runtime_info = {"properties":[property_time],"cuts":[],"fallthroughs":[],"taus":[],"splits":[]}
+        self.runtime_info = {"auxiliary":[property_time],"cuts":[],"fallthroughs":[],"taus":[],"splits":[]}
         self.quality_info = {"cuts":[], "fallthroughs":[]}

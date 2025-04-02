@@ -1,3 +1,6 @@
+import pprint
+import time
+
 from matplotlib.rcsetup import validate_int
 from pm4py.objects.process_tree.utils import generic as pt_util
 from oc_process_trees import OperatorNode,LeafNode
