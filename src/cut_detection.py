@@ -2,9 +2,9 @@ import operator
 
 from scipy.stats import pareto
 
-from cut_definition import *
-from follows_relations import *
-from oc_process_trees import *
+from src.cut_definition import *
+from src.follows_relations import *
+from src.oc_process_trees import *
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 import networkx

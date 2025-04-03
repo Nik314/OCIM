@@ -1,8 +1,8 @@
 import random
 
-from fallthrough_evaluation import *
-from follows_relations import *
-from oc_process_trees import *
+from src.fallthrough_evaluation import *
+from src.follows_relations import *
+from src.oc_process_trees import *
 import more_itertools as mit
 import numpy
 from sklearn.cluster import KMeans

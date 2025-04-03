@@ -1,5 +1,5 @@
-from fallthrough_definition import *
-from oc_process_trees import *
+from src.fallthrough_definition import *
+from src.oc_process_trees import *
 
 def evaluate_concurrent_fallthrough(local_data, global_data, part_one, part_two):
 

@@ -1,5 +1,5 @@
-from common_data import *
-from oc_process_trees import *
+from src.common_data import *
+from src.oc_process_trees import *
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 

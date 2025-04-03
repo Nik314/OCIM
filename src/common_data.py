@@ -1,5 +1,5 @@
-from follows_relations import *
-from interaction_patterns import *
+from src.follows_relations import *
+from src.interaction_patterns import *
 import time
 
 class LocalData:

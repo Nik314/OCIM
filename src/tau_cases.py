@@ -1,6 +1,6 @@
 import pandas
-from cut_definition import *
-from oc_process_trees import *
+from src.cut_definition import *
+from src.oc_process_trees import *
 import time
 
 def detect_tau_cases(local_data, global_data):

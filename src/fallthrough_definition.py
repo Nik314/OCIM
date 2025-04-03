@@ -1,4 +1,4 @@
-from auxillary_methods import *
+from src.auxillary_methods import *
 import itertools
 
 """ Methods to check if a fallthrough is valid. This code is not optimized in any way but rather a 1:1 reflection 

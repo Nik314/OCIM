@@ -1,15 +1,15 @@
 import time
 
-from auxillary_methods import *
-from interaction_patterns import *
-from cut_definition import *
-from follows_relations import *
-from cut_detection import *
-from fallthrough_detection import *
-from tau_cases import *
-from oc_process_trees import *
-from log_splitting import *
-from common_data import *
+from src.auxillary_methods import *
+from src.interaction_patterns import *
+from src.cut_definition import *
+from src.follows_relations import *
+from src.cut_detection import *
+from src.fallthrough_detection import *
+from src.tau_cases import *
+from src.oc_process_trees import *
+from src.log_splitting import *
+from src.common_data import *
 import random
 import warnings
 warnings.filterwarnings("ignore", category=pandas.errors.SettingWithCopyWarning)
@@ -68,8 +68,6 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
     return OperatorNode(operator, subtrees)
 
 
-
-
 def apply(file_path):
     try:
         input_log = pm4py.read_ocel2(file_path).relations
@@ -82,17 +80,6 @@ def apply(file_path):
     result = object_centric_inductive_miner(local_data, global_data),global_data.runtime_info, global_data.quality_info
     global_data.runtime_info["total"] = time.time() -start
     return result
-
-
-
-if __name__ == "__main__":
-
-    from evaluation_util import *
-    experiment_3("../data","../logs", "../ocpts", apply)
-    #plot_experiment_1()
-    #plot_experiment_2()
-    #experiment_1_and_2("../data", apply)
-
 
 
 

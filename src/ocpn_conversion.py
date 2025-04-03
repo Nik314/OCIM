@@ -3,7 +3,7 @@ import time
 
 from matplotlib.rcsetup import validate_int
 from pm4py.objects.process_tree.utils import generic as pt_util
-from oc_process_trees import OperatorNode,LeafNode
+from src.oc_process_trees import OperatorNode,LeafNode
 import pm4py
 from pm4py.objects.petri_net.obj import PetriNet
 from ocpa.objects.oc_petri_net.obj import ObjectCentricPetriNet
@@ -119,6 +119,7 @@ def convert_ocpt_to_ocpn(ocpt):
     assert isinstance(ocpt,OperatorNode) or isinstance(ocpt,LeafNode)
 
     nets = {}
+
     convergent_activities = {}
     ocpt, special_activities = handle_deficiency(ocpt)
 
@@ -127,6 +128,14 @@ def convert_ocpt_to_ocpn(ocpt):
         pt = pt_util.reduce_tau_leafs(pt)
         pt = pt_util.fold(pt)
         nets[ot] = pm4py.convert_to_petri_net(pt)
+
+        pm4py.write_pnml(*nets[ot],f"{ot}.pnml")
+        if input("Do you want to replace the current net with an adjusted one? (y/n)") == "y":
+            nets[ot] = pm4py.read_pnml(input("Please enter the file path to the adjusted net"))
+            print("Please story the original one and check for language equivalence")
+
+        print("Continue with the original net")
+
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
 
     places = []

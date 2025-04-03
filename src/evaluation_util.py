@@ -9,7 +9,7 @@ from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
 from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
 import ocpa.visualization.oc_petri_net.factory
-from ocpn_conversion import *
+from src.ocpn_conversion import *
 
 def check_stats_print(dir_path):
 	for file in os.listdir(dir_path):
@@ -78,16 +78,19 @@ def adjusted_log(ocpa_log, affected_activities):
 
 
 
-def experiment_1_and_2(dir_path,discovery):
+def experiment_1_and_2(dir_path,discovery, result_dir):
+
+	if not os.path.isdir(result_dir):
+		os.mkdir(result_dir)
 
 	try:
-		runtime_result = pandas.read_csv("time_measure.csv")
+		runtime_result = pandas.read_csv(result_dir+"/experiment1.csv")
 	except:
 		runtime_result = pandas.DataFrame(columns=["Log", "Total Time", "Cut Detection",
 			"Fallthrough Detection", "Tau Detection", "Log Splitting", "Interaction Properties"])
 
 	try:
-		quality_result = pandas.read_csv("quality_measure.csv")
+		quality_result = pandas.read_csv(result_dir+"/experiment2.csv")
 	except:
 		quality_result = pandas.DataFrame(columns=["Log", "Total Steps", "Detected Cuts", "Detected Fallthroughs"])
 
@@ -105,17 +108,16 @@ def experiment_1_and_2(dir_path,discovery):
 		runtime_result.loc[runtime_result.shape[0]] = (file, runtime_stats["total"],sum(runtime_stats["cuts"]), sum(runtime_stats["fallthroughs"]),
 				sum(runtime_stats["taus"]), sum(runtime_stats["splits"]), sum(runtime_stats["auxiliary"]))
 
-		runtime_result.to_csv("time_measure.csv",index=False)
+		runtime_result.to_csv(result_dir+"/experiment1.csv",index=False)
 		quality_result.loc[quality_result.shape[0]] = (file,len(quality_stats["cuts"]) + len(quality_stats["fallthroughs"]),
 											quality_stats["cuts"], quality_stats["fallthroughs"])
-		quality_result.to_csv("quality_measure.csv",index=False)
+		quality_result.to_csv(result_dir+"/experiment2.csv",index=False)
 
 
 
-def plot_experiment_1():
+def print_experiment_1(result_dir):
 
-	result = pandas.read_csv("time_measure.csv")
-	import matplotlib.pyplot as plt
+	result = pandas.read_csv(result_dir+"/experiment1.csv")
 	result["Remaining"] = result["Total Time"] - (result["Cut Detection"] + result["Fallthrough Detection"] +
 		result["Tau Detection"] + result["Log Splitting"] +result["Interaction Properties"])
 	for row in ["Cut Detection", "Fallthrough Detection", "Tau Detection", "Log Splitting", "Interaction Properties", "Remaining"]:
@@ -126,9 +128,9 @@ def plot_experiment_1():
 
 
 
-def plot_experiment_2():
+def plot_experiment_2(result_dir):
 	seaborn.set(font_scale=2)
-	result = pandas.read_csv("quality_measure.csv")
+	result = pandas.read_csv(result_dir+"/experiment2.csv")
 	load_string = lambda input:eval(input.replace("->","Operator.SEQUENCE").replace("X","Operator.XOR").replace("+","Operator.PARALLEL").replace("*","Operator.LOOP"))
 	result["Detected Cuts"] = result["Detected Cuts"].apply(load_string)
 	result["Detected Fallthroughs"] = result["Detected Fallthroughs"].apply(load_string)
@@ -143,7 +145,8 @@ def plot_experiment_2():
 
 
 
-def experiment_3(dir_path, temp_dir, ocpt_path, discovery):
+def run_experiment_3(dir_path, result_dir, discovery):
+
 	for file in os.listdir(dir_path):
 
 		try:
@@ -151,24 +154,31 @@ def experiment_3(dir_path, temp_dir, ocpt_path, discovery):
 		except:
 			log = pm4py.read_ocel(dir_path+ "/" + file)
 
-		if os.path.isfile(f"{ocpt_path}/{file.split(".")[0]}.ocpt"):
+		if not os.path.isdir(result_dir+"/"+file.split(".")[0]):
+			os.mkdir(result_dir+"/"+file.split(".")[0])
+
+		storage = result_dir+"/"+file.split(".")[0]
+
+		if os.path.isfile(storage+"results.ocpt"):
 			continue
 
-		pm4py.write_ocel2(log,f"{temp_dir}/{file.split(".")[0]}.jsonocel")
-		pm4py.write_ocel2(log,f"{temp_dir}/{file.split(".")[0]}.xml")
-		ocpa_log = ocel_import_factory.apply(f"{temp_dir}/{file.split(".")[0]}.xml")
+		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.jsonocel")
+		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.xml")
+		ocpa_log = ocel_import_factory.apply(f"{storage}/{file.split('.')[0]}.xml")
 		print("Number of process executions: " + str(len(ocpa_log.process_executions)))
 		print("Number of total objects: " +str(log.relations["ocel:oid"].nunique()))
 
-		ocpt, _, __ = discovery(f"{temp_dir}/{file.split(".")[0]}.jsonocel")
+		ocpt, _, __ = discovery(f"{storage}/{file.split('.')[0]}.jsonocel")
 		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
 		print("OCPT Discovery Completed")
 
 		precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
 			special_activities), ocpn, special_activities=special_activities)
-		export_ocpt(f"{ocpt_path}/{file.split('.')[0]}.ocpt", ocpt,
+
+		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt", ocpt,
 					{ "fitness": fitness, "precision": precision,
 					 "skipped": skipped, "timed": timed, "total": total})
+
 		print("OCPT Conformance Completed")
 
 
@@ -187,18 +197,18 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 			except:
 				pass
 
-		if os.path.isfile(f"{ocpn_path}/{file.split(".")[0]}.ocpn"):
+		if os.path.isfile(f"{ocpn_path}/{file.split('.')[0]}.ocpn"):
 			continue
 
-		pm4py.write_ocel2(log,f"{log_paths}/{file.split(".")[0]}.jsonocel")
-		pm4py.write_ocel2(log,f"{log_paths}/{file.split(".")[0]}.xml")
+		pm4py.write_ocel2(log,f"{log_paths}/{file.split('.')[0]}.jsonocel")
+		pm4py.write_ocel2(log,f"{log_paths}/{file.split('.')[0]}.xml")
 
-		ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split(".")[0]}.xml")
+		ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('.')[0]}.xml")
 		print("Number of process executions: " + str(len(ocpa_log.process_executions)))
 		print("Number of total objects: " +str(log.relations["ocel:oid"].nunique()))
 
 		start = time.time()
-		ocpt,runtime_stats, quality_stats = discovery(f"{log_paths}/{file.split(".")[0]}.jsonocel")
+		ocpt,runtime_stats, quality_stats = discovery(f"{log_paths}/{file.split('.')[0]}.jsonocel")
 		runtime_stats["total"] = time.time() -start
 		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
 		print("OCPT Discovery Completed")
@@ -217,7 +227,7 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 		print("OCPN Discovery Completed")
 
 		precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, ocpn)
-		export_ocpn(f"{ocpn}/{file.split(".")[0]}.ocpn", ocpn.to_dict(),
+		export_ocpn(f"{ocpn}/{file.split('.')[0]}.ocpn", ocpn.to_dict(),
 		{"runtime": runtime,"fitness":fitness,"precision":precision,
 				"skipped":skipped,"timed":timed,"total":total})
 		print("OCPN Conformance Completed")

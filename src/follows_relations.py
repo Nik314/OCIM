@@ -1,5 +1,5 @@
 import networkx
-from auxillary_methods import *
+from src.auxillary_methods import *
 
 
 
