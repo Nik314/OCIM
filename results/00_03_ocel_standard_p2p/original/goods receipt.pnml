@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1743778797.791442" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1743778797.791442</text>
+    </name>
+    <page id="n0">
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p_5">
+        <name>
+          <text>p_5</text>
+        </name>
+      </place>
+      <place id="p_12">
+        <name>
+          <text>p_12</text>
+        </name>
+      </place>
+      <place id="p_13">
+        <name>
+          <text>p_13</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <place id="p_7">
+        <name>
+          <text>p_7</text>
+        </name>
+      </place>
+      <place id="p_9">
+        <name>
+          <text>p_9</text>
+        </name>
+      </place>
+      <place id="p_10">
+        <name>
+          <text>p_10</text>
+        </name>
+      </place>
+      <transition id="tau_1">
+        <name>
+          <text>tau_1</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="12d4edcd-5837-4c81-8d54-4a30eba7e70a"/>
+      </transition>
+      <transition id="adc0e74f-68b2-49f8-8c76-fc3e55871c0e">
+        <name>
+          <text>Execute Payment</text>
+        </name>
+      </transition>
+      <transition id="skip_7">
+        <name>
+          <text>skip_7</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="b939eeda-ad1e-498e-a541-f82501a8bd5a"/>
+      </transition>
+      <transition id="d7f0d66a-1c5c-4904-8a2e-eb1ce0fe9815">
+        <name>
+          <text>Create Goods Receipt</text>
+        </name>
+      </transition>
+      <transition id="tauJoin_4">
+        <name>
+          <text>tauJoin_4</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="8d249032-2a48-4401-b152-f558b3bafcc1"/>
+      </transition>
+      <transition id="3efefdd8-b5f4-4d4f-800d-70a11d848792">
+        <name>
+          <text>Create Invoice Receipt</text>
+        </name>
+      </transition>
+      <transition id="c89764e2-3a3a-4de4-8ac3-11c47438bab8">
+        <name>
+          <text>Perform Two-Way Match</text>
+        </name>
+      </transition>
+      <arc id="3061333513216" source="p_9" target="adc0e74f-68b2-49f8-8c76-fc3e55871c0e"/>
+      <arc id="3061333521280" source="p_13" target="tauJoin_4"/>
+      <arc id="3061333515008" source="tau_1" target="p_5"/>
+      <arc id="3061333510528" source="c89764e2-3a3a-4de4-8ac3-11c47438bab8" target="p_9"/>
+      <arc id="3061333514896" source="source" target="tau_1"/>
+      <arc id="3061333512208" source="tau_1" target="p_12"/>
+      <arc id="3061333510416" source="p_10" target="tauJoin_4"/>
+      <arc id="3061333522848" source="p_5" target="3efefdd8-b5f4-4d4f-800d-70a11d848792"/>
+      <arc id="3061333515680" source="adc0e74f-68b2-49f8-8c76-fc3e55871c0e" target="p_10"/>
+      <arc id="3061333512880" source="p_10" target="skip_7"/>
+      <arc id="3061333517136" source="3efefdd8-b5f4-4d4f-800d-70a11d848792" target="p_7"/>
+      <arc id="3061333514448" source="skip_7" target="p_9"/>
+      <arc id="3061333523184" source="tauJoin_4" target="sink"/>
+      <arc id="3061333519600" source="p_7" target="c89764e2-3a3a-4de4-8ac3-11c47438bab8"/>
+      <arc id="3061333512432" source="p_12" target="d7f0d66a-1c5c-4904-8a2e-eb1ce0fe9815"/>
+      <arc id="3061333515120" source="d7f0d66a-1c5c-4904-8a2e-eb1ce0fe9815" target="p_13"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

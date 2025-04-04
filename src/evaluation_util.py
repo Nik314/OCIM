@@ -5,6 +5,8 @@ import time
 import seaborn
 import numpy
 import pandas
+
+from new_conformance.log_context import replay_single_cardinality
 from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
 from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
@@ -58,15 +60,14 @@ def export_ocpn(file_path, ocpn, additional=None):
 
 
 
-def export_ocpt(file_path, ocpt, additional=None):
+def export_ocpt(file_path, ocpt, ocpn, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpt.get_as_dict()) + "\n")
 		text_file.write(str(ocpt))
 
-	translated_ocpt, special = convert_ocpt_to_ocpn(ocpt)
 	ocpa.visualization.oc_petri_net.factory.save(
-		ocpa.visualization.oc_petri_net.factory.apply(translated_ocpt), file_path.replace(".ocpt",".png"))
+		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpt",".png"))
 
 
 def adjusted_log(ocpa_log, affected_activities):
@@ -158,24 +159,31 @@ def run_experiment_3(dir_path, result_dir, discovery):
 			os.mkdir(result_dir+"/"+file.split(".")[0])
 
 		storage = result_dir+"/"+file.split(".")[0]
-
-		if os.path.isfile(storage+"results.ocpt"):
-			continue
-
 		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.jsonocel")
-		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.xml")
-		ocpa_log = ocel_import_factory.apply(f"{storage}/{file.split('.')[0]}.xml")
-		print("Number of process executions: " + str(len(ocpa_log.process_executions)))
-		print("Number of total objects: " +str(log.relations["ocel:oid"].nunique()))
-
 		ocpt, _, __ = discovery(f"{storage}/{file.split('.')[0]}.jsonocel")
-		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
+		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt, storage)
+
+		#todo adjust log for deficiency
 		print("OCPT Discovery Completed")
+
+		from new_conformance.log_context import determine_log_context, get_unique_start_marking
+		hash_to_activity_map, event_to_context_map, unique_context_list = determine_log_context(log.relations)
+		unique_cardinalities, cardinality_hash_context_map = get_unique_start_marking(unique_context_list)
+
+		for hash_value, cardinality in unique_cardinalities.items():
+			contained_context = cardinality_hash_context_map[hash_value]
+			replay_single_cardinality(ocpn.transitions,ocpn.places,ocpn.arcs,contained_context,cardinality)
+
+		exit()
+
+
+
+
 
 		precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
 			special_activities), ocpn, special_activities=special_activities)
 
-		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt", ocpt,
+		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt", ocpt, ocpn,
 					{ "fitness": fitness, "precision": precision,
 					 "skipped": skipped, "timed": timed, "total": total})
 
@@ -222,7 +230,6 @@ def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
 					 "skipped": skipped, "timed": timed, "total": total})
 
 		start = time.time()
-		ocpn = ocpn_discovery_factory.apply(ocpa_log, parameters={"debug": True})
 		runtime = time.time()-start
 		print("OCPN Discovery Completed")
 

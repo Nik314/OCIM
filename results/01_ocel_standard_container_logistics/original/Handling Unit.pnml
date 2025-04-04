@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1743759870.2302291" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1743759870.2302291</text>
+    </name>
+    <page id="n0">
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p_3">
+        <name>
+          <text>p_3</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <transition id="d799d69b-ca28-48ee-9101-dfb1b5eda3c1">
+        <name>
+          <text>Collect Goods</text>
+        </name>
+      </transition>
+      <transition id="70150c4b-9aca-41ef-b1c1-8193a892e089">
+        <name>
+          <text>Load Truck</text>
+        </name>
+      </transition>
+      <transition id="skip_1">
+        <name>
+          <text>skip_1</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="7bc4d832-7482-469e-bb8c-f059885fa63a"/>
+      </transition>
+      <arc id="2922701076000" source="source" target="d799d69b-ca28-48ee-9101-dfb1b5eda3c1"/>
+      <arc id="2922701075776" source="d799d69b-ca28-48ee-9101-dfb1b5eda3c1" target="p_3"/>
+      <arc id="2922701075328" source="p_3" target="70150c4b-9aca-41ef-b1c1-8193a892e089"/>
+      <arc id="2922701075440" source="70150c4b-9aca-41ef-b1c1-8193a892e089" target="sink"/>
+      <arc id="2922701075888" source="p_3" target="skip_1"/>
+      <arc id="2922701074992" source="skip_1" target="sink"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

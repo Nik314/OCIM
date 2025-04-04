@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1743778797.7935617" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1743778797.7935617</text>
+    </name>
+    <page id="n0">
+      <place id="p_3">
+        <name>
+          <text>p_3</text>
+        </name>
+      </place>
+      <place id="p_10">
+        <name>
+          <text>p_10</text>
+        </name>
+      </place>
+      <place id="p_11">
+        <name>
+          <text>p_11</text>
+        </name>
+      </place>
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <place id="p_7">
+        <name>
+          <text>p_7</text>
+        </name>
+      </place>
+      <place id="p_8">
+        <name>
+          <text>p_8</text>
+        </name>
+      </place>
+      <transition id="fdf04a17-7e03-48ed-88c6-0c30aae09144">
+        <name>
+          <text>Create Purchase Order</text>
+        </name>
+      </transition>
+      <transition id="ba5026ae-5605-4460-9646-fa16e4754bda">
+        <name>
+          <text>Execute Payment</text>
+        </name>
+      </transition>
+      <transition id="skip_5">
+        <name>
+          <text>skip_5</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="92b55672-2ff7-42d3-ae09-99bbae270df0"/>
+      </transition>
+      <transition id="f72e5c09-0635-480f-a145-576e129346ce">
+        <name>
+          <text>Create Goods Receipt</text>
+        </name>
+      </transition>
+      <transition id="77882eab-8883-4701-909b-c0dcf9599c23">
+        <name>
+          <text>Approve Purchase Order</text>
+        </name>
+      </transition>
+      <transition id="tauJoin_2">
+        <name>
+          <text>tauJoin_2</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="afac2118-3099-47ba-bb34-2031015c40e2"/>
+      </transition>
+      <arc id="3061333517696" source="ba5026ae-5605-4460-9646-fa16e4754bda" target="p_8"/>
+      <arc id="3061333518480" source="fdf04a17-7e03-48ed-88c6-0c30aae09144" target="p_3"/>
+      <arc id="3061333522064" source="tauJoin_2" target="sink"/>
+      <arc id="3066136342416" source="p_10" target="f72e5c09-0635-480f-a145-576e129346ce"/>
+      <arc id="3066136338832" source="f72e5c09-0635-480f-a145-576e129346ce" target="p_11"/>
+      <arc id="3061333520160" source="p_7" target="ba5026ae-5605-4460-9646-fa16e4754bda"/>
+      <arc id="3066136341408" source="skip_5" target="p_7"/>
+      <arc id="3066136339616" source="p_8" target="tauJoin_2"/>
+      <arc id="3061333520048" source="source" target="fdf04a17-7e03-48ed-88c6-0c30aae09144"/>
+      <arc id="3061333521840" source="p_3" target="77882eab-8883-4701-909b-c0dcf9599c23"/>
+      <arc id="3066136342976" source="77882eab-8883-4701-909b-c0dcf9599c23" target="p_7"/>
+      <arc id="3061333512544" source="p_8" target="skip_5"/>
+      <arc id="3066136338272" source="77882eab-8883-4701-909b-c0dcf9599c23" target="p_10"/>
+      <arc id="3066136340064" source="p_11" target="tauJoin_2"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

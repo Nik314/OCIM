@@ -22,7 +22,6 @@ if __name__ == "__main__":
 	#evaluation_util.print_experiment_1(result_directory)
 	#evaluation_util.plot_experiment_2(result_directory)
 
-
 	evaluation_util.run_experiment_3("data","results", apply)
 
 

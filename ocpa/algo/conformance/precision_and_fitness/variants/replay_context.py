@@ -231,7 +231,7 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     times = [0, 0, 0, 0, 0]
     while not index == len(q):
         # For long running event calculations
-        if index > 300:
+        if index > 3000:
             skipped = True
             break
 
@@ -274,7 +274,6 @@ def calculate_single_event(context, binding, object_types, ocpn, target_string):
     #     if random.randint(0, 500) == 1:
     #         print("500 events calculated")
     # =============================================================================
-    print("1 Context Done")
     return result, times, target_string, skipped
 
 
@@ -282,14 +281,17 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
     context_list = [contexts[i] for i in contexts.keys()]
     binding_list = [bindings[i] for i in contexts.keys()]
     targets = [context_to_string(contexts[i]) for i in contexts.keys()]
-    inputs = list(zip(context_list, binding_list, itertools.repeat(object_types), itertools.repeat(ocpn), targets))
+    inputs = list(zip(context_list, binding_list, itertools.repeat(object_types),
+        [ocpn for _ in range(len(targets))], targets))
+
     print(len(inputs))
+    result = []
+    for i in range(len(context_list)):
+        if i % 100 == 0:
+            print(i/len(inputs))
+        result.append(calculate_single_event(*inputs[i]))
 
-    #result = []
-    #for i in range(len(context_list)):
-    #   result.append(calculate_single_event(*inputs[i]))
-
-    result = multiprocessing.Pool(12).starmap(calculate_single_event,inputs)
+    #result = multiprocessing.Pool(12).starmap(calculate_single_event,inputs)
 
     results = {}
     total_times = numpy.array([0.0, 0.0, 0.0, 0.0, 0.0])
@@ -301,6 +303,7 @@ def enabled_model_activities_multiprocessing(contexts, bindings, ocpn, object_ty
         [results[k].add(v_elem) for v_elem in v]
         if skipped:
             total_timed.append(target_string)
+
     return results,total_timed
 
 
@@ -322,6 +325,10 @@ def calculate_precision_and_fitness(ocel, context_mapping, en_l, en_m, total_tim
         if context_to_string(context) in total_timed:
             timed += 1
             continue
+
+        print(context)
+        print(en_l_a)
+        print(en_m_a)
 
         if len(en_m[context_to_string(context)]) == 0 or (set(en_l_a).intersection(en_m_a) == set()):
             skipped += 1

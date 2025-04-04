@@ -1,5 +1,7 @@
+import os.path
 import pprint
 import time
+from os import mkdir
 
 from matplotlib.rcsetup import validate_int
 from pm4py.objects.process_tree.utils import generic as pt_util
@@ -114,9 +116,13 @@ def handle_deficiency(ocpt):
 
 
 
-def convert_ocpt_to_ocpn(ocpt):
+def convert_ocpt_to_ocpn(ocpt, storage):
 
     assert isinstance(ocpt,OperatorNode) or isinstance(ocpt,LeafNode)
+    if not os.path.isdir(f"{storage}/original"):
+        os.mkdir(f"{storage}/original")
+    if not os.path.isdir(f"{storage}/adjusted"):
+        os.mkdir(f"{storage}/adjusted")
 
     nets = {}
 
@@ -128,15 +134,16 @@ def convert_ocpt_to_ocpn(ocpt):
         pt = pt_util.reduce_tau_leafs(pt)
         pt = pt_util.fold(pt)
         nets[ot] = pm4py.convert_to_petri_net(pt)
-
-        pm4py.write_pnml(*nets[ot],f"{ot}.pnml")
-        if input("Do you want to replace the current net with an adjusted one? (y/n)") == "y":
-            nets[ot] = pm4py.read_pnml(input("Please enter the file path to the adjusted net"))
-            print("Please story the original one and check for language equivalence")
-
-        print("Continue with the original net")
-
+        pm4py.write_pnml(*nets[ot],f"{storage}/original/{ot}.pnml")
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
+
+    if input(f"Use adjusted models? Make sure they are there in {storage}/adjusted/ ! (y/n)") == "y":
+        for ot in ocpt.get_object_types():
+            nets[ot] = pm4py.read_pnml(f"{storage}/adjusted/{ot}.pnml")
+            print(nets[ot])
+        print("Continue with the adjusted net!")
+    else:
+        print("Continue with the original net!")
 
     places = []
     transitions = []
@@ -205,4 +212,5 @@ def convert_ocpt_to_ocpn(ocpt):
     ocpn = ObjectCentricPetriNet(
         places=set(places), transitions=set(transitions), arcs=set(arcs), nets=nets, place_mapping=place_mapping,
         transition_mapping=transition_mapping, arc_mapping=arc_mapping)
+
     return ocpn, special_activities
