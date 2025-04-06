@@ -1,10 +1,9 @@
 import copy
-
 import rustworkx
 import hashlib
+import numpy
 from multiset import Multiset
 from itertools import chain, combinations, product
-import numpy
 
 
 class State:
@@ -12,8 +11,42 @@ class State:
         self.sequence = sequence
         self.marking = marking
 
-    def get_state_context_hash(self):
-        pass
+    def hash_state(self,all_types):
+        context_hash = self.get_state_context_hash(all_types)
+        marking_hash = self.get_marking_hash()
+        return str(context_hash) + str(marking_hash) + (str(self.sequence[-1][0]) if self.sequence else "")
+
+
+    def get_marking_hash(self):
+        hash_string = str(list(sorted([(str(p),len(self.marking[p])) for p in self.marking.keys()])))
+        return int(hashlib.md5(hash_string.encode("utf_8")).hexdigest(), 16)
+
+
+    def get_state_context(self, all_types):
+
+        result = {ot:{oid:tuple() for transition,objects in self.sequence for oid in objects.get(ot,[])} for ot in all_types}
+
+        for transition, all_objects in self.sequence[:-1]:
+            for ot,typed_objects in all_objects.items():
+                for oid in typed_objects:
+                    if not transition.silent:
+                        result[ot][oid] = *result[ot][oid],transition.label
+
+        return {ot:Multiset(trace for trace in result[ot].values()) for ot in all_types}
+
+
+    def get_state_context_hash(self, all_types):
+
+        result = {ot:{oid:tuple() for transition,objects in self.sequence for oid in objects.get(ot,[])} for ot in all_types}
+
+        for transition, all_objects in self.sequence[:-1]:
+            for ot,typed_objects in all_objects.items():
+                for oid in typed_objects:
+                    if not transition.silent:
+                        result[ot][oid] = *result[ot][oid],transition.label
+
+        result = {ot:Multiset(trace for trace in result[ot].values()) for ot in all_types}
+        return hash_context(result)
 
 
 def hash_context(context):
@@ -91,9 +124,6 @@ def get_unique_start_marking(unique_context_list):
     return unique_cardinalities,cardinality_hash_context_mapping
 
 
-
-
-
 def get_enabled_transitions(transitions, places, arcs, state):
 
     results = []
@@ -139,37 +169,69 @@ def fire_enabled_transition(transitions, places, arcs, state, transition, object
 
 
 
-def check_context_possible(state, contained_contexts):
-    #todo check if at least of of the contained contexts can still be reached
-    return True
 
-def adapt_result_for_match(state, contained_contexts, result):
-    pass
+def adapt_result_for_match(state, contained_contexts, result, all_types):
+
+    for context in contained_contexts:
+        if state.get_state_context_hash(all_types) == hash_context(context):
+            if not state.sequence[-1][0].silent:
+                result[hash_context(context)].add(state.sequence[-1][0].label)
 
 
 
-def replay_single_cardinality(transitions, places, arcs, contained_contexts, cardinality):
+def replay_single_cardinality(transitions, places, arcs, contained_contexts, cardinality, log_enabled_activities):
 
+    visited_states = set()
     start_model_marking = {p:set() if not p.initial else set(list(range(0,cardinality[p.object_type]))) for p in places}
     start_model_state = State([], start_model_marking)
     state_queue = [start_model_state]
     context_hash_to_enabled_activities = {hash_context(c):set() for c in contained_contexts}
-    total_states_visited = 0
+    all_types = {p.object_type for p in places}
 
     while state_queue:
 
         current_state = state_queue[0]
-        print(current_state.marking)
-        adapt_result_for_match(current_state,contained_contexts,context_hash_to_enabled_activities)
+        if current_state.hash_state(all_types) in visited_states:
+            state_queue.remove(current_state)
+            continue
 
+        adapt_result_for_match(current_state,contained_contexts,context_hash_to_enabled_activities,all_types)
         possible_next_states = [fire_enabled_transition(transitions,places,arcs,current_state,transition,objects)
             for transition,objects in get_enabled_transitions(transitions,places,arcs,current_state)]
+        state_queue += possible_next_states
 
-        allowed_next_states = [state for state in possible_next_states if check_context_possible(state,contained_contexts)]
-        state_queue += allowed_next_states
         state_queue.remove(current_state)
+        visited_states.add(current_state.hash_state(all_types))
 
-        print(total_states_visited)
-        total_states_visited += 1
+    hash_to_conformance = {}
+    for context in contained_contexts:
+        key = hash_context(context)
+        model_enabled = context_hash_to_enabled_activities[key]
+        log_enabled = log_enabled_activities[key]
+        local_fitness = len(set(model_enabled) & set(log_enabled)) / len(log_enabled) if model_enabled else 0
+        local_precision = len(set(model_enabled) & set(log_enabled)) / len(model_enabled) if model_enabled else 1
+        hash_to_conformance[key] = local_fitness,local_precision
 
-    print("Full Run On A Single Cardinality Set :) ")
+        if local_fitness != 1:
+            print(context)
+            print(set(a for a in log_enabled if a not in model_enabled))
+
+    return hash_to_conformance
+
+
+def determine_conformance(ocpn, log):
+    hash_to_activity_map, event_to_context_map, unique_context_list = determine_log_context(log.relations)
+    unique_cardinalities, cardinality_hash_context_map = get_unique_start_marking(unique_context_list)
+    hash_to_conformance = {}
+    print(len(unique_cardinalities))
+    for hash_value, cardinality in unique_cardinalities.items():
+        contained_context = cardinality_hash_context_map[hash_value]
+        hash_to_conformance.update(replay_single_cardinality(ocpn.transitions, ocpn.places, ocpn.arcs
+        , contained_context, cardinality, {hash_context(context):hash_to_activity_map[hash_context(context)]
+                                                                        for context in contained_context}))
+        print("------------------------------------------")
+
+    total_fitness = [hash_to_conformance[hash_context(context)][0] for context in event_to_context_map.values()]
+    total_precision = [hash_to_conformance[hash_context(context)][1] for context in event_to_context_map.values()]
+    print(numpy.mean(total_fitness),numpy.mean(total_precision))
+    return numpy.mean(total_fitness),numpy.mean(total_precision)

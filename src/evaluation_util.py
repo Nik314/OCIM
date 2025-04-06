@@ -166,15 +166,12 @@ def run_experiment_3(dir_path, result_dir, discovery):
 		#todo adjust log for deficiency
 		print("OCPT Discovery Completed")
 
-		from new_conformance.log_context import determine_log_context, get_unique_start_marking
-		hash_to_activity_map, event_to_context_map, unique_context_list = determine_log_context(log.relations)
-		unique_cardinalities, cardinality_hash_context_map = get_unique_start_marking(unique_context_list)
-
-		for hash_value, cardinality in unique_cardinalities.items():
-			contained_context = cardinality_hash_context_map[hash_value]
-			replay_single_cardinality(ocpn.transitions,ocpn.places,ocpn.arcs,contained_context,cardinality)
-
+		ocpa.visualization.oc_petri_net.factory.save(
+			ocpa.visualization.oc_petri_net.factory.apply(ocpn), "debug_current_net.png")
+		from new_conformance.log_context import determine_conformance
+		determine_conformance(ocpn,log)
 		exit()
+
 
 
 
