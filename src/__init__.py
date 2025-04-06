@@ -34,8 +34,8 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
 
     if len(local_data.alphabet) == 1:
 
-        info = [{ot:log[log["ocel:type"] == ot].groupby("ocel:oid").apply(lambda frame:frame["ocel:eid"].nunique()).max() for ot in global_data.related[local_data.alphabet[0]]} for log in local_data.oc_log_list]
-        loops = {ot for ot in global_data.related[local_data.alphabet[0]] if any([sub[ot] > 1 for sub in info if isinstance(sub, numpy.int64)] + [False]) and ot not in global_data.divergence[local_data.alphabet[0]]}
+        loops = {ot for ot in global_data.related[local_data.alphabet[0]] if
+                 any([log[log["ocel:type"]==ot].groupby("ocel:oid").apply(lambda frame:frame.shape[0]).max() > 1 for log in local_data.oc_log_list])}
 
         if loops:
             return OperatorNode(Operator.LOOP,subtrees=[LeafNode(local_data.alphabet[0], global_data.related[local_data.alphabet[0]],

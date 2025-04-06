@@ -1,6 +1,7 @@
 import copy
 import rustworkx
 import hashlib
+import multiprocessing
 import numpy
 from multiset import Multiset
 from itertools import chain, combinations, product
@@ -169,6 +170,23 @@ def fire_enabled_transition(transitions, places, arcs, state, transition, object
 
 
 
+def check_context_reachable(state, contained_contexts,all_types):
+
+    state_context = state.get_state_context(all_types)
+    for context in contained_contexts:
+        sub_result = True
+        for ot in state_context.keys():
+            for partial_trace in state_context[ot]:
+                if not any(len(partial_trace) <= len(trace) and all(trace[i] == partial_trace[i] for i in range(len(partial_trace))) for trace in context[ot]):
+                    sub_result = False
+                    break
+            if not sub_result:
+                break
+        if sub_result:
+            return True
+
+    return False
+
 
 def adapt_result_for_match(state, contained_contexts, result, all_types):
 
@@ -179,8 +197,11 @@ def adapt_result_for_match(state, contained_contexts, result, all_types):
 
 
 
-def replay_single_cardinality(transitions, places, arcs, contained_contexts, cardinality, log_enabled_activities):
+def replay_single_cardinality(ocpn, contained_contexts, cardinality, log_enabled_activities):
 
+    transitions = ocpn.transitions
+    arcs = ocpn.arcs
+    places = ocpn.places
     visited_states = set()
     start_model_marking = {p:set() if not p.initial else set(list(range(0,cardinality[p.object_type]))) for p in places}
     start_model_state = State([], start_model_marking)
@@ -191,7 +212,8 @@ def replay_single_cardinality(transitions, places, arcs, contained_contexts, car
     while state_queue:
 
         current_state = state_queue[0]
-        if current_state.hash_state(all_types) in visited_states:
+        if (current_state.hash_state(all_types) in visited_states or
+            not check_context_reachable(current_state,contained_contexts,all_types)):
             state_queue.remove(current_state)
             continue
 
@@ -216,20 +238,29 @@ def replay_single_cardinality(transitions, places, arcs, contained_contexts, car
             print(context)
             print(set(a for a in log_enabled if a not in model_enabled))
 
+    print("----------------------------------")
     return hash_to_conformance
 
 
 def determine_conformance(ocpn, log):
+
+
     hash_to_activity_map, event_to_context_map, unique_context_list = determine_log_context(log.relations)
     unique_cardinalities, cardinality_hash_context_map = get_unique_start_marking(unique_context_list)
     hash_to_conformance = {}
-    print(len(unique_cardinalities))
-    for hash_value, cardinality in unique_cardinalities.items():
-        contained_context = cardinality_hash_context_map[hash_value]
-        hash_to_conformance.update(replay_single_cardinality(ocpn.transitions, ocpn.places, ocpn.arcs
-        , contained_context, cardinality, {hash_context(context):hash_to_activity_map[hash_context(context)]
-                                                                        for context in contained_context}))
-        print("------------------------------------------")
+    print("Log Context Done")
+    print("Model Context Distribution Running On: ",len(unique_cardinalities))
+
+    inputs = [(copy.deepcopy(ocpn),cardinality_hash_context_map[hash_value],
+            cardinality, copy.deepcopy({hash_context(context): hash_to_activity_map[hash_context(context)]
+            for context in cardinality_hash_context_map[hash_value]})) for hash_value, cardinality in unique_cardinalities.items()]
+
+    #for arguments in inputs:
+    #    hash_to_conformance.update(replay_single_cardinality(*arguments))
+
+    result = multiprocessing.Pool(4).starmap(replay_single_cardinality, inputs)
+    for entry in result:
+        hash_to_conformance.update(entry)
 
     total_fitness = [hash_to_conformance[hash_context(context)][0] for context in event_to_context_map.values()]
     total_precision = [hash_to_conformance[hash_context(context)][1] for context in event_to_context_map.values()]

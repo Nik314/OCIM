@@ -140,7 +140,6 @@ def convert_ocpt_to_ocpn(ocpt, storage):
     if input(f"Use adjusted models? Make sure they are there in {storage}/adjusted/ ! (y/n)") == "y":
         for ot in ocpt.get_object_types():
             nets[ot] = pm4py.read_pnml(f"{storage}/adjusted/{ot}.pnml")
-            print(nets[ot])
         print("Continue with the adjusted net!")
     else:
         print("Continue with the original net!")

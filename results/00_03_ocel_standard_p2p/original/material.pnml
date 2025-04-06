@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pnml>
-  <net id="imdf_net_1743948252.6823015" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+  <net id="imdf_net_1743952409.2281659" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
     <name>
-      <text>imdf_net_1743948252.6823015</text>
+      <text>imdf_net_1743952409.2281659</text>
     </name>
     <page id="n0">
       <place id="source">
@@ -13,53 +13,53 @@
           <text>1</text>
         </initialMarking>
       </place>
-      <place id="sink">
-        <name>
-          <text>sink</text>
-        </name>
-      </place>
       <place id="p_3">
         <name>
           <text>p_3</text>
         </name>
       </place>
-      <transition id="834a89ee-2aae-4073-9c81-adb7e03fb046">
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <transition id="3f474a48-488b-48c1-a4cb-bc5464cbed80">
         <name>
           <text>Create Purchase Requisition</text>
+        </name>
+      </transition>
+      <transition id="5948a68a-5a30-4794-992e-4e6d53802eab">
+        <name>
+          <text>Approve Purchase Requisition</text>
         </name>
       </transition>
       <transition id="skip_1">
         <name>
           <text>skip_1</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="4f374213-5f2e-428c-88ff-87d2b7a923b3"/>
-      </transition>
-      <transition id="d90e92ca-0e83-4285-bc8e-227ebf7a1f74">
-        <name>
-          <text>Delegate Purchase Requisition Approval</text>
-        </name>
-      </transition>
-      <transition id="87da9c4e-ae5c-4737-a46a-fcfd78a892c0">
-        <name>
-          <text>Approve Purchase Requisition</text>
-        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="10e911b9-7f63-452a-94b0-e56ff30964fa"/>
       </transition>
       <transition id="skip_2">
         <name>
           <text>skip_2</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="a7bb1f24-8c73-43c9-ac44-53c1710817a6"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="38489faf-57c2-43db-b551-f60a575e60ef"/>
       </transition>
-      <arc id="2709593365248" source="source" target="834a89ee-2aae-4073-9c81-adb7e03fb046"/>
-      <arc id="2709593362784" source="skip_1" target="p_3"/>
-      <arc id="2709593358752" source="p_3" target="87da9c4e-ae5c-4737-a46a-fcfd78a892c0"/>
-      <arc id="2709593362112" source="834a89ee-2aae-4073-9c81-adb7e03fb046" target="p_3"/>
-      <arc id="2709593361440" source="d90e92ca-0e83-4285-bc8e-227ebf7a1f74" target="sink"/>
-      <arc id="2709593362336" source="p_3" target="skip_2"/>
-      <arc id="2709593358528" source="skip_2" target="sink"/>
-      <arc id="2709593362672" source="source" target="skip_1"/>
-      <arc id="2709593362896" source="87da9c4e-ae5c-4737-a46a-fcfd78a892c0" target="sink"/>
-      <arc id="2709593361104" source="p_3" target="d90e92ca-0e83-4285-bc8e-227ebf7a1f74"/>
+      <transition id="1f72f239-830b-4047-966e-df6eff81679e">
+        <name>
+          <text>Delegate Purchase Requisition Approval</text>
+        </name>
+      </transition>
+      <arc id="1230024505088" source="3f474a48-488b-48c1-a4cb-bc5464cbed80" target="p_3"/>
+      <arc id="1230024506656" source="skip_1" target="p_3"/>
+      <arc id="1230024504640" source="source" target="skip_1"/>
+      <arc id="1230024505984" source="p_3" target="5948a68a-5a30-4794-992e-4e6d53802eab"/>
+      <arc id="1230024506208" source="1f72f239-830b-4047-966e-df6eff81679e" target="sink"/>
+      <arc id="1230024505760" source="p_3" target="skip_2"/>
+      <arc id="1230024505872" source="source" target="3f474a48-488b-48c1-a4cb-bc5464cbed80"/>
+      <arc id="1230024498704" source="5948a68a-5a30-4794-992e-4e6d53802eab" target="sink"/>
+      <arc id="1230024506320" source="p_3" target="1f72f239-830b-4047-966e-df6eff81679e"/>
+      <arc id="1230024499824" source="skip_2" target="sink"/>
     </page>
     <finalmarkings>
       <marking>
