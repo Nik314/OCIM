@@ -1,12 +1,9 @@
 import os
 from itertools import chain,combinations
 import matplotlib.pyplot as plt
-import time
 import seaborn
-import numpy
 import pandas
 
-from new_conformance.log_context import replay_single_cardinality
 from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
 from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
 from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
