@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn
 import pandas
 
-from ocpa.objects.log.importer.ocel2.xml import factory as ocel_import_factory
-from ocpa.algo.discovery.ocpn import algorithm as ocpn_discovery_factory
-from ocpa.algo.conformance.precision_and_fitness import evaluator as quality_measure_factory
+from  src.conformance import determine_conformance
 import ocpa.visualization.oc_petri_net.factory
 from src.ocpn_conversion import *
+
+
 
 def check_stats_print(dir_path):
 	for file in os.listdir(dir_path):
@@ -40,8 +40,6 @@ def check_stats_latex(dir_path):
 				  f" {log.relations['ocel:oid'].nunique()} & {log.relations['ocel:type'].nunique()}&No& \\cite" +"{}\\\\")
 
 
-
-
 def powerset(iterable):
 	s = list(iterable)
 	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
@@ -67,12 +65,12 @@ def export_ocpt(file_path, ocpt, ocpn, additional=None):
 		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpt",".png"))
 
 
-def adjusted_log(ocpa_log, affected_activities):
-	ocpa_log.log.log["event_activity"] = ocpa_log.log.log.apply(lambda row:(row["event_activity"] +"<|>"+ str(sorted([ot
-		for ot in ocpa_log.object_types if row[ot]])) if row["event_activity"] in affected_activities
-															else row["event_activity"]),axis=1)
+def adjusted_log(relations, affected_activities):
 
-	return ocpa_log
+	lookup = relations.groupby("ocel:eid").apply(lambda frame:list(frame["ocel:type"].unique())).to_dict()
+	relations["ocel:activity"] = relations.apply(lambda row:(row["ocel:activity"] +"<|>" + str(sorted(
+		lookup[row["ocel:eid"]])) if row["ocel:activity"] in affected_activities else row["ocel:activity"]),axis=1)
+	return relations
 
 
 
@@ -159,77 +157,13 @@ def run_experiment_3(dir_path, result_dir, discovery):
 		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.jsonocel")
 		ocpt, _, __ = discovery(f"{storage}/{file.split('.')[0]}.jsonocel")
 		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt, storage)
-
-		#todo adjust log for deficiency
 		print("OCPT Discovery Completed")
 
-		ocpa.visualization.oc_petri_net.factory.save(
-			ocpa.visualization.oc_petri_net.factory.apply(ocpn), "debug_current_net.png")
-		from new_conformance.log_context import determine_conformance
-		determine_conformance(ocpn,log)
-		exit()
+		fitness, precision, timeout = determine_conformance(ocpn,adjusted_log(log.relations,special_activities))
+		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt",ocpt,ocpn, {"Fitness":fitness,
+			"Precision":precision,"Timeouts":timeout})
+		print("Conformance Check Completed")
 
 
 
-
-
-
-		precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
-			special_activities), ocpn, special_activities=special_activities)
-
-		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt", ocpt, ocpn,
-					{ "fitness": fitness, "precision": precision,
-					 "skipped": skipped, "timed": timed, "total": total})
-
-		print("OCPT Conformance Completed")
-
-
-
-def determine_runtime_demands(dir_path,log_paths,ocpn_path,ocpt_path,discovery):
-	for file in os.listdir(dir_path):
-
-		try:
-			log = pm4py.read_ocel2(dir_path+ "/" + file)
-		except:
-			log = pm4py.read_ocel(dir_path+ "/" + file)
-
-		for dir in [log_paths,ocpn_path,ocpt_path]:
-			try:
-				os.mkdir(f"{dir}")
-			except:
-				pass
-
-		if os.path.isfile(f"{ocpn_path}/{file.split('.')[0]}.ocpn"):
-			continue
-
-		pm4py.write_ocel2(log,f"{log_paths}/{file.split('.')[0]}.jsonocel")
-		pm4py.write_ocel2(log,f"{log_paths}/{file.split('.')[0]}.xml")
-
-		ocpa_log = ocel_import_factory.apply(f"{log_paths}/{file.split('.')[0]}.xml")
-		print("Number of process executions: " + str(len(ocpa_log.process_executions)))
-		print("Number of total objects: " +str(log.relations["ocel:oid"].nunique()))
-
-		start = time.time()
-		ocpt,runtime_stats, quality_stats = discovery(f"{log_paths}/{file.split('.')[0]}.jsonocel")
-		runtime_stats["total"] = time.time() -start
-		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt)
-		print("OCPT Discovery Completed")
-
-		precision, fitness, skipped, timed, total = quality_measure_factory.apply(adjusted_log(ocpa_log,
-			special_activities), ocpn, special_activities=special_activities)
-		print("OCPT Conformance Completed")
-		export_ocpt(f"{ocpt_path}/{file.split('.')[0]}.ocpt", ocpt,
-					{"runtime": runtime_stats, "quality":quality_stats,
-					 "fitness": fitness, "precision": precision,
-					 "skipped": skipped, "timed": timed, "total": total})
-
-		start = time.time()
-		runtime = time.time()-start
-		print("OCPN Discovery Completed")
-
-		precision, fitness, skipped, timed, total = quality_measure_factory.apply(ocpa_log, ocpn)
-		export_ocpn(f"{ocpn}/{file.split('.')[0]}.ocpn", ocpn.to_dict(),
-		{"runtime": runtime,"fitness":fitness,"precision":precision,
-				"skipped":skipped,"timed":timed,"total":total})
-		print("OCPN Conformance Completed")
 

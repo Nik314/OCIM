@@ -137,7 +137,7 @@ def convert_ocpt_to_ocpn(ocpt, storage):
         pm4py.write_pnml(*nets[ot],f"{storage}/original/{ot}.pnml")
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
 
-    if True:#input(f"Use adjusted models? Make sure they are there in {storage}/adjusted/ ! (y/n)") == "y":
+    if input(f"Use adjusted models? Make sure they are there in {storage}/adjusted/ ! (y/n)") == "y":
         for ot in ocpt.get_object_types():
             nets[ot] = pm4py.read_pnml(f"{storage}/adjusted/{ot}.pnml")
         print("Continue with the adjusted net!")
