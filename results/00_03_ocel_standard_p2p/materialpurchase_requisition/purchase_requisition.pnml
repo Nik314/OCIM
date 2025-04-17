@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pnml>
-  <net id="imdf_net_1744877428.9969127" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+  <net id="imdf_net_1744878042.9392054" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
     <name>
-      <text>imdf_net_1744877428.9969127</text>
+      <text>imdf_net_1744878042.9392054</text>
     </name>
     <page id="n0">
       <place id="source">
@@ -28,12 +28,12 @@
           <text>sink</text>
         </name>
       </place>
-      <transition id="862f5734-d1d0-4504-b6a6-883d4a1ea308">
+      <transition id="db61bce3-f483-4e01-bf68-fb23d406e187">
         <name>
           <text>Delegate Purchase Requisition Approval</text>
         </name>
       </transition>
-      <transition id="ce20b8bb-dee6-4904-811f-d240e6e6aebc">
+      <transition id="92ed8e45-4d5a-4004-aa71-5d9890029e29">
         <name>
           <text>Create Purchase Requisition</text>
         </name>
@@ -42,36 +42,36 @@
         <name>
           <text>skip_1</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="d1231a5b-8239-450b-aee6-9131616d2ea6"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="dac9d615-eea4-480e-9e87-f5cc3abf1a2e"/>
       </transition>
       <transition id="skip_2">
         <name>
           <text>skip_2</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="17564cdd-8ede-4d71-a2cc-feeeabec6f97"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="6e6b5ff7-071f-4f71-a0ef-b7b93c54f97b"/>
       </transition>
-      <transition id="29e5ca6a-eb48-41bd-af9c-2ee8a0ca240d">
+      <transition id="06400c1c-643b-4fd5-b422-2e1723a95228">
         <name>
           <text>Approve Purchase Requisition</text>
         </name>
       </transition>
-      <transition id="839d3c64-9970-4a05-a34a-7fabbac7ff4c">
+      <transition id="f0679212-a2d6-431d-8180-ea9e95645b62">
         <name>
           <text>Create Request for Quotation</text>
         </name>
       </transition>
-      <arc id="2095453637664" source="source" target="ce20b8bb-dee6-4904-811f-d240e6e6aebc"/>
-      <arc id="2095453153440" source="p_4" target="839d3c64-9970-4a05-a34a-7fabbac7ff4c"/>
-      <arc id="2095453263888" source="ce20b8bb-dee6-4904-811f-d240e6e6aebc" target="p_3"/>
-      <arc id="2095452729904" source="p_3" target="29e5ca6a-eb48-41bd-af9c-2ee8a0ca240d"/>
-      <arc id="2095452728688" source="skip_1" target="p_3"/>
-      <arc id="2095453265168" source="source" target="skip_1"/>
-      <arc id="2095453024720" source="29e5ca6a-eb48-41bd-af9c-2ee8a0ca240d" target="p_4"/>
-      <arc id="2095453215184" source="p_3" target="862f5734-d1d0-4504-b6a6-883d4a1ea308"/>
-      <arc id="2095453215728" source="862f5734-d1d0-4504-b6a6-883d4a1ea308" target="p_4"/>
-      <arc id="2095453233744" source="p_3" target="skip_2"/>
-      <arc id="2095453233488" source="skip_2" target="p_4"/>
-      <arc id="2095453153200" source="839d3c64-9970-4a05-a34a-7fabbac7ff4c" target="sink"/>
+      <arc id="2157612944416" source="source" target="92ed8e45-4d5a-4004-aa71-5d9890029e29"/>
+      <arc id="2157612079840" source="p_3" target="db61bce3-f483-4e01-bf68-fb23d406e187"/>
+      <arc id="2157612017344" source="f0679212-a2d6-431d-8180-ea9e95645b62" target="sink"/>
+      <arc id="2157612128272" source="92ed8e45-4d5a-4004-aa71-5d9890029e29" target="p_3"/>
+      <arc id="2157611594288" source="p_3" target="06400c1c-643b-4fd5-b422-2e1723a95228"/>
+      <arc id="2157611593072" source="skip_1" target="p_3"/>
+      <arc id="2157612129552" source="source" target="skip_1"/>
+      <arc id="2157611889104" source="06400c1c-643b-4fd5-b422-2e1723a95228" target="p_4"/>
+      <arc id="2157612080112" source="db61bce3-f483-4e01-bf68-fb23d406e187" target="p_4"/>
+      <arc id="2157612114768" source="p_3" target="skip_2"/>
+      <arc id="2157612114512" source="skip_2" target="p_4"/>
+      <arc id="2157612017584" source="p_4" target="f0679212-a2d6-431d-8180-ea9e95645b62"/>
     </page>
     <finalmarkings>
       <marking>
