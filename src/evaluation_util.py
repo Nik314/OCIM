@@ -154,15 +154,27 @@ def run_experiment_3(dir_path, result_dir, discovery):
 			os.mkdir(result_dir+"/"+file.split(".")[0])
 
 		storage = result_dir+"/"+file.split(".")[0]
-		pm4py.write_ocel2(log,f"{storage}/{file.split('.')[0]}.jsonocel")
-		ocpt, _, __ = discovery(f"{storage}/{file.split('.')[0]}.jsonocel")
-		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt, storage)
-		print("OCPT Discovery Completed")
+		object_types = log.relations["ocel:type"].unique()
+		type_pairs = [(object_types[i],object_types[j])  for i in range(0,len(object_types)) for j in range(i+1,len(object_types))]
+		pm4py.write_ocel2(log, f"{storage}/{file.split('.')[0]}.jsonocel")
 
-		fitness, precision, timeout = determine_conformance(ocpn,adjusted_log(log.relations,special_activities))
-		export_ocpt(f"{storage}/{file.split('.')[0]}.ocpt",ocpt,ocpn, {"Fitness":fitness,
-			"Precision":precision,"Timeouts":timeout})
-		print("Conformance Check Completed")
+		for ot1,ot2 in type_pairs:
+
+			sub_storage = storage + "/" + (str(ot1) + str(ot2)).replace(":","").replace(" ","")
+			if not os.path.isdir(sub_storage):
+				os.mkdir(sub_storage)
+
+			sublog = pm4py.filter_ocel_object_types(log,[ot1,ot2],positive=True)
+			pm4py.write_ocel2(sublog, f"{sub_storage}/{file.split('.')[0]}.jsonocel")
+			ocpt, _, __ = discovery(f"{sub_storage}/{file.split('.')[0]}.jsonocel")
+			print("OCPT Discovery Completed")
+			ocpn, special_activities = convert_ocpt_to_ocpn(ocpt, sub_storage)
+			print("OCPN Conversion Completed")
+
+			fitness, precision, timeout = determine_conformance(ocpn,adjusted_log(sublog.relations,special_activities))
+			export_ocpt(f"{sub_storage}/{file.split('.')[0]}.ocpt",ocpt,ocpn, {"Fitness":fitness,
+				"Precision":precision,"Timeouts":timeout})
+			print("Conformance Check Completed")
 
 
 

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pnml>
-  <net id="imdf_net_1744105195.00104" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+  <net id="imdf_net_1744117046.0185134" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
     <name>
-      <text>imdf_net_1744105195.00104</text>
+      <text>imdf_net_1744117046.0185134</text>
     </name>
     <page id="n0">
       <place id="source">
@@ -13,33 +13,33 @@
           <text>1</text>
         </initialMarking>
       </place>
-      <place id="sink">
-        <name>
-          <text>sink</text>
-        </name>
-      </place>
       <place id="p_3">
         <name>
           <text>p_3</text>
         </name>
       </place>
-      <transition id="skip_2">
+      <place id="sink">
         <name>
-          <text>skip_2</text>
+          <text>sink</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="2c625dd0-1a8c-433f-a86c-e11d379f550d"/>
-      </transition>
-      <transition id="f7595a7c-2974-4555-9a16-3cd554cf2015">
+      </place>
+      <transition id="b6587069-1f3b-4d00-9441-a8cae966a073">
         <name>
           <text>Create Purchase Requisition</text>
         </name>
       </transition>
-      <transition id="6ba0adbd-e170-441d-bed4-2f33d3ef2ace">
+      <transition id="24f877ea-596e-4850-8a0f-739db41ede58">
         <name>
           <text>Delegate Purchase Requisition Approval</text>
         </name>
       </transition>
-      <transition id="6e4ae01e-fd7b-4e85-9546-843ade47ab15">
+      <transition id="skip_2">
+        <name>
+          <text>skip_2</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="ac031602-c9dd-4119-9c41-52ec703247eb"/>
+      </transition>
+      <transition id="52b34828-32a0-4972-b0e4-39319b39f4f5">
         <name>
           <text>Approve Purchase Requisition</text>
         </name>
@@ -48,18 +48,18 @@
         <name>
           <text>skip_1</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="f8e09d45-a257-4a01-9794-62e38bc4db18"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="684dbd15-6b56-4696-8dba-db043f333f17"/>
       </transition>
-      <arc id="2031057473216" source="source" target="f7595a7c-2974-4555-9a16-3cd554cf2015"/>
-      <arc id="2031044681504" source="p_3" target="6e4ae01e-fd7b-4e85-9546-843ade47ab15"/>
-      <arc id="2031044742992" source="f7595a7c-2974-4555-9a16-3cd554cf2015" target="p_3"/>
-      <arc id="2031044210032" source="skip_1" target="p_3"/>
-      <arc id="2031044208816" source="p_3" target="6ba0adbd-e170-441d-bed4-2f33d3ef2ace"/>
-      <arc id="2031044746832" source="source" target="skip_1"/>
-      <arc id="2031044506640" source="6ba0adbd-e170-441d-bed4-2f33d3ef2ace" target="sink"/>
-      <arc id="2031044679056" source="6e4ae01e-fd7b-4e85-9546-843ade47ab15" target="sink"/>
-      <arc id="2031044731728" source="p_3" target="skip_2"/>
-      <arc id="2031044730704" source="skip_2" target="sink"/>
+      <arc id="2026814003520" source="source" target="b6587069-1f3b-4d00-9441-a8cae966a073"/>
+      <arc id="2026814001952" source="source" target="skip_1"/>
+      <arc id="2026814002400" source="p_3" target="24f877ea-596e-4850-8a0f-739db41ede58"/>
+      <arc id="2026814003072" source="skip_1" target="p_3"/>
+      <arc id="2026814002176" source="24f877ea-596e-4850-8a0f-739db41ede58" target="sink"/>
+      <arc id="2026814002064" source="b6587069-1f3b-4d00-9441-a8cae966a073" target="p_3"/>
+      <arc id="2026814002736" source="p_3" target="52b34828-32a0-4972-b0e4-39319b39f4f5"/>
+      <arc id="2026814002512" source="52b34828-32a0-4972-b0e4-39319b39f4f5" target="sink"/>
+      <arc id="2026814002960" source="p_3" target="skip_2"/>
+      <arc id="2026814003408" source="skip_2" target="sink"/>
     </page>
     <finalmarkings>
       <marking>

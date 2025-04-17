@@ -119,11 +119,6 @@ def handle_deficiency(ocpt):
 def convert_ocpt_to_ocpn(ocpt, storage):
 
     assert isinstance(ocpt,OperatorNode) or isinstance(ocpt,LeafNode)
-    if not os.path.isdir(f"{storage}/original"):
-        os.mkdir(f"{storage}/original")
-    if not os.path.isdir(f"{storage}/adjusted"):
-        os.mkdir(f"{storage}/adjusted")
-
     nets = {}
 
     convergent_activities = {}
@@ -133,16 +128,19 @@ def convert_ocpt_to_ocpn(ocpt, storage):
         pt = project_ocpt(ocpt,ot)
         pt = pt_util.reduce_tau_leafs(pt)
         pt = pt_util.fold(pt)
-        nets[ot] = pm4py.convert_to_petri_net(pt)
-        pm4py.write_pnml(*nets[ot],f"{storage}/original/{ot}.pnml")
+        net,im,fm = pm4py.convert_to_petri_net(pt)
+        net = pm4py.objects.petri_net.utils.reduction.apply_simple_reduction(net)
+        net = pm4py.objects.petri_net.utils.reduction.apply_a_rule(net)
+        net = pm4py.objects.petri_net.utils.reduction.apply_r_rule(net)
+        net = pm4py.objects.petri_net.utils.reduction.apply_elp_rule(net,im)
+        net = pm4py.objects.petri_net.utils.reduction.apply_elt_rule(net)
+        net = pm4py.objects.petri_net.utils.reduction.apply_fpp_rule(net,im)
+        net = pm4py.objects.petri_net.utils.reduction.apply_fpt_rule(net)
+        net,im,fm = pm4py.objects.petri_net.utils.reduction.apply_fsp_rule(net,im,fm)
+        net = pm4py.objects.petri_net.utils.reduction.apply_fst_rule(net)
+        nets[ot] = net,im,fm
+        pm4py.write_pnml(*nets[ot],f"{storage}/{ot.replace(":","_")}.pnml")
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
-
-    if input(f"Use adjusted models? Make sure they are there in {storage}/adjusted/ ! (y/n)") == "y":
-        for ot in ocpt.get_object_types():
-            nets[ot] = pm4py.read_pnml(f"{storage}/adjusted/{ot}.pnml")
-        print("Continue with the adjusted net!")
-    else:
-        print("Continue with the original net!")
 
     places = []
     transitions = []

@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1744877429.001574" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1744877429.001574</text>
+    </name>
+    <page id="n0">
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p_3">
+        <name>
+          <text>p_3</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <transition id="skip_1">
+        <name>
+          <text>skip_1</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="b1978675-a29e-4a3e-9e33-10f7f34fe978"/>
+      </transition>
+      <transition id="9d7a0275-15b1-4d7a-8996-155385a2b21c">
+        <name>
+          <text>Create Purchase Requisition</text>
+        </name>
+      </transition>
+      <transition id="361d7286-85e1-4238-bd60-ff3c4064fd98">
+        <name>
+          <text>Approve Purchase Requisition</text>
+        </name>
+      </transition>
+      <transition id="skip_2">
+        <name>
+          <text>skip_2</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="ff6a2b7b-c2f5-432d-8462-249e23b92a79"/>
+      </transition>
+      <transition id="6f089087-5fcd-4f60-af57-ce3e5fbb51d9">
+        <name>
+          <text>Delegate Purchase Requisition Approval</text>
+        </name>
+      </transition>
+      <arc id="2095453085504" source="p_3" target="6f089087-5fcd-4f60-af57-ce3e5fbb51d9"/>
+      <arc id="2095453059936" source="skip_2" target="sink"/>
+      <arc id="2095454047152" source="source" target="9d7a0275-15b1-4d7a-8996-155385a2b21c"/>
+      <arc id="2095451812880" source="p_3" target="361d7286-85e1-4238-bd60-ff3c4064fd98"/>
+      <arc id="2095454047376" source="9d7a0275-15b1-4d7a-8996-155385a2b21c" target="p_3"/>
+      <arc id="2095595746800" source="source" target="skip_1"/>
+      <arc id="2095451815376" source="skip_1" target="p_3"/>
+      <arc id="2095453086384" source="361d7286-85e1-4238-bd60-ff3c4064fd98" target="sink"/>
+      <arc id="2095572971632" source="6f089087-5fcd-4f60-af57-ce3e5fbb51d9" target="sink"/>
+      <arc id="2095572974192" source="p_3" target="skip_2"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

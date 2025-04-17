@@ -1,0 +1,116 @@
+{'Fitness': np.float64(1.0), 'Precision': np.float64(0.72), 'Timeouts': 0.5242314770635949}
+{'operator': '->', 'subtrees': [{'operator': 'X', 'subtrees': [{'activity': 'Create Purchase Requisition', 'related': {'material', 'purchase_requisition'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['material', 'purchase_requisition'], 'divergent': ['material', 'purchase_requisition'], 'convergent': ['material', 'purchase_requisition'], 'deficient': ['material', 'purchase_requisition']}]}, {'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'activity': 'Delegate Purchase Requisition Approval', 'related': {'material', 'purchase_requisition'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['material', 'purchase_requisition'], 'divergent': ['material', 'purchase_requisition'], 'convergent': ['material', 'purchase_requisition'], 'deficient': ['material', 'purchase_requisition']}]}, {'operator': 'X', 'subtrees': [{'activity': 'Approve Purchase Requisition', 'related': {'material', 'purchase_requisition'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['material', 'purchase_requisition'], 'divergent': ['material', 'purchase_requisition'], 'convergent': ['material', 'purchase_requisition'], 'deficient': ['material', 'purchase_requisition']}]}]}, {'activity': '', 'related': ['material', 'purchase_requisition'], 'divergent': ['material', 'purchase_requisition'], 'convergent': ['material', 'purchase_requisition'], 'deficient': ['material', 'purchase_requisition']}]}, {'activity': 'Create Request for Quotation', 'related': {'quotation', 'purchase_requisition'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': '*', 'subtrees': [{'activity': 'Create Purchase Order', 'related': {'quotation', 'purchase_order'}, 'divergent': {'quotation'}, 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['quotation', 'purchase_order'], 'divergent': ['quotation', 'purchase_order'], 'convergent': ['quotation', 'purchase_order'], 'deficient': ['quotation', 'purchase_order']}]}, {'operator': '*', 'subtrees': [{'activity': 'Approve Purchase Order', 'related': {'quotation', 'purchase_order'}, 'divergent': {'quotation'}, 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['quotation', 'purchase_order'], 'divergent': ['quotation', 'purchase_order'], 'convergent': ['quotation', 'purchase_order'], 'deficient': ['quotation', 'purchase_order']}]}, {'operator': '+', 'subtrees': [{'operator': '->', 'subtrees': [{'operator': '*', 'subtrees': [{'activity': 'Create Invoice Receipt', 'related': {'goods receipt', 'invoice receipt'}, 'divergent': {'invoice receipt'}, 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['goods receipt', 'invoice receipt'], 'divergent': ['goods receipt', 'invoice receipt'], 'convergent': ['goods receipt', 'invoice receipt'], 'deficient': ['goods receipt', 'invoice receipt']}]}, {'operator': '*', 'subtrees': [{'activity': 'Perform Two-Way Match', 'related': {'goods receipt', 'invoice receipt'}, 'divergent': {'invoice receipt'}, 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['goods receipt', 'invoice receipt'], 'divergent': ['goods receipt', 'invoice receipt'], 'convergent': ['goods receipt', 'invoice receipt'], 'deficient': ['goods receipt', 'invoice receipt']}]}, {'operator': '*', 'subtrees': [{'activity': 'Execute Payment', 'related': {'goods receipt', 'invoice receipt', 'purchase_order', 'payment'}, 'divergent': set(), 'convergent': {'purchase_order', 'goods receipt'}, 'deficient': set()}, {'activity': '', 'related': ['payment', 'purchase_order', 'goods receipt', 'invoice receipt'], 'divergent': ['payment', 'purchase_order', 'goods receipt', 'invoice receipt'], 'convergent': ['payment', 'purchase_order', 'goods receipt', 'invoice receipt'], 'deficient': ['payment', 'purchase_order', 'goods receipt', 'invoice receipt']}]}]}, {'operator': '*', 'subtrees': [{'activity': 'Create Goods Receipt', 'related': {'goods receipt', 'purchase_order'}, 'divergent': {'purchase_order', 'goods receipt'}, 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['purchase_order', 'goods receipt'], 'divergent': ['purchase_order', 'goods receipt'], 'convergent': ['purchase_order', 'goods receipt'], 'deficient': ['purchase_order', 'goods receipt']}]}]}]}
+->
+	X
+		Create Purchase Requisition
+			 Related Types: {'material', 'purchase_requisition'}
+			 Divergent Types: set()
+			 Convergent Types: {'material'}
+			 Deficient Types: set()
+		
+			 Related Types: ['material', 'purchase_requisition']
+			 Divergent Types: ['material', 'purchase_requisition']
+			 Convergent Types: ['material', 'purchase_requisition']
+			 Deficient Types: ['material', 'purchase_requisition']
+	X
+		X
+			X
+				Delegate Purchase Requisition Approval
+					 Related Types: {'material', 'purchase_requisition'}
+					 Divergent Types: set()
+					 Convergent Types: {'material'}
+					 Deficient Types: set()
+				
+					 Related Types: ['material', 'purchase_requisition']
+					 Divergent Types: ['material', 'purchase_requisition']
+					 Convergent Types: ['material', 'purchase_requisition']
+					 Deficient Types: ['material', 'purchase_requisition']
+			X
+				Approve Purchase Requisition
+					 Related Types: {'material', 'purchase_requisition'}
+					 Divergent Types: set()
+					 Convergent Types: {'material'}
+					 Deficient Types: set()
+				
+					 Related Types: ['material', 'purchase_requisition']
+					 Divergent Types: ['material', 'purchase_requisition']
+					 Convergent Types: ['material', 'purchase_requisition']
+					 Deficient Types: ['material', 'purchase_requisition']
+		
+			 Related Types: ['material', 'purchase_requisition']
+			 Divergent Types: ['material', 'purchase_requisition']
+			 Convergent Types: ['material', 'purchase_requisition']
+			 Deficient Types: ['material', 'purchase_requisition']
+	Create Request for Quotation
+		 Related Types: {'quotation', 'purchase_requisition'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	*
+		Create Purchase Order
+			 Related Types: {'quotation', 'purchase_order'}
+			 Divergent Types: {'quotation'}
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['quotation', 'purchase_order']
+			 Divergent Types: ['quotation', 'purchase_order']
+			 Convergent Types: ['quotation', 'purchase_order']
+			 Deficient Types: ['quotation', 'purchase_order']
+	*
+		Approve Purchase Order
+			 Related Types: {'quotation', 'purchase_order'}
+			 Divergent Types: {'quotation'}
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['quotation', 'purchase_order']
+			 Divergent Types: ['quotation', 'purchase_order']
+			 Convergent Types: ['quotation', 'purchase_order']
+			 Deficient Types: ['quotation', 'purchase_order']
+	+
+		->
+			*
+				Create Invoice Receipt
+					 Related Types: {'goods receipt', 'invoice receipt'}
+					 Divergent Types: {'invoice receipt'}
+					 Convergent Types: set()
+					 Deficient Types: set()
+				
+					 Related Types: ['goods receipt', 'invoice receipt']
+					 Divergent Types: ['goods receipt', 'invoice receipt']
+					 Convergent Types: ['goods receipt', 'invoice receipt']
+					 Deficient Types: ['goods receipt', 'invoice receipt']
+			*
+				Perform Two-Way Match
+					 Related Types: {'goods receipt', 'invoice receipt'}
+					 Divergent Types: {'invoice receipt'}
+					 Convergent Types: set()
+					 Deficient Types: set()
+				
+					 Related Types: ['goods receipt', 'invoice receipt']
+					 Divergent Types: ['goods receipt', 'invoice receipt']
+					 Convergent Types: ['goods receipt', 'invoice receipt']
+					 Deficient Types: ['goods receipt', 'invoice receipt']
+			*
+				Execute Payment
+					 Related Types: {'goods receipt', 'invoice receipt', 'purchase_order', 'payment'}
+					 Divergent Types: set()
+					 Convergent Types: {'purchase_order', 'goods receipt'}
+					 Deficient Types: set()
+				
+					 Related Types: ['payment', 'purchase_order', 'goods receipt', 'invoice receipt']
+					 Divergent Types: ['payment', 'purchase_order', 'goods receipt', 'invoice receipt']
+					 Convergent Types: ['payment', 'purchase_order', 'goods receipt', 'invoice receipt']
+					 Deficient Types: ['payment', 'purchase_order', 'goods receipt', 'invoice receipt']
+		*
+			Create Goods Receipt
+				 Related Types: {'goods receipt', 'purchase_order'}
+				 Divergent Types: {'purchase_order', 'goods receipt'}
+				 Convergent Types: set()
+				 Deficient Types: set()
+			
+				 Related Types: ['purchase_order', 'goods receipt']
+				 Divergent Types: ['purchase_order', 'goods receipt']
+				 Convergent Types: ['purchase_order', 'goods receipt']
+				 Deficient Types: ['purchase_order', 'goods receipt']

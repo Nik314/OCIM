@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pnml>
-  <net id="imdf_net_1743759870.2404547" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+  <net id="imdf_net_1744122879.1679797" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
     <name>
-      <text>imdf_net_1743759870.2404547</text>
+      <text>imdf_net_1744122879.1679797</text>
     </name>
     <page id="n0">
       <place id="sink">
@@ -33,52 +33,52 @@
           <text>p_5</text>
         </name>
       </place>
-      <transition id="4dedf804-c215-42fc-a35b-609a4e2cb28a">
+      <transition id="2021e59e-f74b-44c6-b4d4-fd2e0daa7802">
         <name>
           <text>Load Truck</text>
+        </name>
+      </transition>
+      <transition id="tau_1">
+        <name>
+          <text>tau_1</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="9d148862-6e6a-4a7d-ae6a-16f9a0f67bd3"/>
+      </transition>
+      <transition id="skip_5">
+        <name>
+          <text>skip_5</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="b881df3c-5956-4a77-ab48-b0ff351f4720"/>
+      </transition>
+      <transition id="loop_4">
+        <name>
+          <text>loop_4</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="84ed15ce-c223-424c-8f8a-21b702994597"/>
+      </transition>
+      <transition id="29845344-e895-4cd2-b408-26f6751c25d8">
+        <name>
+          <text>Drive to Terminal</text>
         </name>
       </transition>
       <transition id="skip_6">
         <name>
           <text>skip_6</text>
         </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="48fc8256-63e5-43a4-b5fe-137395bd3831"/>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="c0074bd1-3779-48c8-8912-5adf0a9f17de"/>
       </transition>
-      <transition id="tau_1">
-        <name>
-          <text>tau_1</text>
-        </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="b381b4b8-5bab-4660-88db-02ed38496c3c"/>
-      </transition>
-      <transition id="skip_5">
-        <name>
-          <text>skip_5</text>
-        </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="21bf1d62-fb15-4317-b3c9-300ffef84f0c"/>
-      </transition>
-      <transition id="loop_4">
-        <name>
-          <text>loop_4</text>
-        </name>
-        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="dc98adb3-c9ed-4aa6-8344-8e43e1979d4f"/>
-      </transition>
-      <transition id="8fc99800-6fda-42f9-9da8-e38ab2bd6458">
-        <name>
-          <text>Drive to Terminal</text>
-        </name>
-      </transition>
-      <arc id="2922648570912" source="tau_1" target="p_5"/>
-      <arc id="2922648569344" source="p_5" target="skip_5"/>
-      <arc id="2922648569792" source="p_6" target="8fc99800-6fda-42f9-9da8-e38ab2bd6458"/>
-      <arc id="2922648570240" source="4dedf804-c215-42fc-a35b-609a4e2cb28a" target="p_7"/>
-      <arc id="2922648567888" source="source" target="tau_1"/>
-      <arc id="2922648571024" source="skip_6" target="sink"/>
-      <arc id="2922648569456" source="skip_5" target="p_6"/>
-      <arc id="2922648569904" source="8fc99800-6fda-42f9-9da8-e38ab2bd6458" target="p_7"/>
-      <arc id="2922648570128" source="p_6" target="4dedf804-c215-42fc-a35b-609a4e2cb28a"/>
-      <arc id="2922648570576" source="p_6" target="skip_6"/>
-      <arc id="2922648570352" source="p_7" target="loop_4"/>
-      <arc id="2922648570800" source="loop_4" target="p_5"/>
+      <arc id="2026816127840" source="skip_6" target="sink"/>
+      <arc id="2026860002368" source="p_5" target="skip_5"/>
+      <arc id="2026860002816" source="p_6" target="29845344-e895-4cd2-b408-26f6751c25d8"/>
+      <arc id="2026816127392" source="p_6" target="skip_6"/>
+      <arc id="2026816127168" source="p_7" target="loop_4"/>
+      <arc id="2026816127616" source="loop_4" target="p_5"/>
+      <arc id="2026859987696" source="source" target="tau_1"/>
+      <arc id="2026816127728" source="tau_1" target="p_5"/>
+      <arc id="2026860002480" source="skip_5" target="p_6"/>
+      <arc id="2026860002928" source="29845344-e895-4cd2-b408-26f6751c25d8" target="p_7"/>
+      <arc id="2026860003152" source="p_6" target="2021e59e-f74b-44c6-b4d4-fd2e0daa7802"/>
+      <arc id="2026816127056" source="2021e59e-f74b-44c6-b4d4-fd2e0daa7802" target="p_7"/>
     </page>
     <finalmarkings>
       <marking>

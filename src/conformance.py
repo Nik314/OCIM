@@ -72,6 +72,7 @@ def determine_log_context(relations):
     context_hash_to_event_mapping = {}
 
     for event in graph.nodes():
+
         ancestors = rustworkx.ancestors(graph,index[event])
         sub_relations = relations[relations["ocel:eid"].isin(ancestors)]
         context = {ot: Multiset() for ot in relations["ocel:type"].unique()}
@@ -97,6 +98,7 @@ def determine_log_context(relations):
             context_hash_to_event_mapping[hash_value] = [index[event]]
 
         event_to_context_mapping[index[event]] = context
+        print("Progress On Log Context: ",len(event_to_context_mapping) / len(graph.nodes()))
 
     context_hash_to_activity_mapping = {key:set(value) for key,value in context_hash_to_activity_mapping.items()}
     return context_hash_to_activity_mapping, event_to_context_mapping, unique_context_list, context_hash_to_event_mapping
@@ -216,7 +218,7 @@ def replay_single_cardinality(ocpn, contained_contexts, cardinality, log_enabled
             del current_state
             continue
 
-        if len(visited_information) >= (event_size*2000):
+        if len(visited_information) >= (event_size*1000000):
             break
 
         state_queue += [fire_enabled_transition(transitions,places,arcs,current_state,transition,objects)
@@ -267,7 +269,7 @@ def determine_conformance(ocpn, relations):
             for context in cardinality_hash_context_map[hash_value]) / len(event_to_context_map.keys()))
             for hash_value, cardinality in unique_cardinalities.items()]
 
-    result = multiprocessing.Pool(8).starmap(replay_single_cardinality, inputs)
+    result = multiprocessing.Pool(3).starmap(replay_single_cardinality, inputs)
     for entry in result:
         hash_to_conformance.update(entry)
 
@@ -275,7 +277,9 @@ def determine_conformance(ocpn, relations):
                      hash_to_conformance[hash_context(context)][0] != "Timed"]
     total_precision = [hash_to_conformance[hash_context(context)][1] for context in event_to_context_map.values() if
                        hash_to_conformance[hash_context(context)][1] != "Timed"]
-    total_timed = [1 for context in event_to_context_map.values() if hash_to_conformance[hash_context(context)][1] == "Timed"]
+    total_timed = [1 for context in event_to_context_map.values()
+                   if hash_to_conformance[hash_context(context)][1] == "Timed"]
+
     print(numpy.mean(total_fitness),numpy.mean(total_precision),len(total_timed)/len(event_to_context_map.keys()))
     return numpy.mean(total_fitness),numpy.mean(total_precision),len(total_timed)/len(event_to_context_map.keys())
 

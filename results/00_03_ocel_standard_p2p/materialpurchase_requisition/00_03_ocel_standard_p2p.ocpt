@@ -1,0 +1,48 @@
+{'Fitness': np.float64(1.0), 'Precision': np.float64(0.6688679245283019), 'Timeouts': 0.0}
+{'operator': '->', 'subtrees': [{'operator': 'X', 'subtrees': [{'activity': 'Create Purchase Requisition', 'related': {'purchase_requisition', 'material'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['purchase_requisition', 'material'], 'divergent': ['purchase_requisition', 'material'], 'convergent': ['purchase_requisition', 'material'], 'deficient': ['purchase_requisition', 'material']}]}, {'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'activity': 'Approve Purchase Requisition', 'related': {'purchase_requisition', 'material'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['purchase_requisition', 'material'], 'divergent': ['purchase_requisition', 'material'], 'convergent': ['purchase_requisition', 'material'], 'deficient': ['purchase_requisition', 'material']}]}, {'operator': 'X', 'subtrees': [{'activity': 'Delegate Purchase Requisition Approval', 'related': {'purchase_requisition', 'material'}, 'divergent': set(), 'convergent': {'material'}, 'deficient': set()}, {'activity': '', 'related': ['purchase_requisition', 'material'], 'divergent': ['purchase_requisition', 'material'], 'convergent': ['purchase_requisition', 'material'], 'deficient': ['purchase_requisition', 'material']}]}]}, {'activity': '', 'related': ['purchase_requisition', 'material'], 'divergent': ['purchase_requisition', 'material'], 'convergent': ['purchase_requisition', 'material'], 'deficient': ['purchase_requisition', 'material']}]}, {'activity': 'Create Request for Quotation', 'related': {'purchase_requisition'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}]}
+->
+	X
+		Create Purchase Requisition
+			 Related Types: {'purchase_requisition', 'material'}
+			 Divergent Types: set()
+			 Convergent Types: {'material'}
+			 Deficient Types: set()
+		
+			 Related Types: ['purchase_requisition', 'material']
+			 Divergent Types: ['purchase_requisition', 'material']
+			 Convergent Types: ['purchase_requisition', 'material']
+			 Deficient Types: ['purchase_requisition', 'material']
+	X
+		X
+			X
+				Approve Purchase Requisition
+					 Related Types: {'purchase_requisition', 'material'}
+					 Divergent Types: set()
+					 Convergent Types: {'material'}
+					 Deficient Types: set()
+				
+					 Related Types: ['purchase_requisition', 'material']
+					 Divergent Types: ['purchase_requisition', 'material']
+					 Convergent Types: ['purchase_requisition', 'material']
+					 Deficient Types: ['purchase_requisition', 'material']
+			X
+				Delegate Purchase Requisition Approval
+					 Related Types: {'purchase_requisition', 'material'}
+					 Divergent Types: set()
+					 Convergent Types: {'material'}
+					 Deficient Types: set()
+				
+					 Related Types: ['purchase_requisition', 'material']
+					 Divergent Types: ['purchase_requisition', 'material']
+					 Convergent Types: ['purchase_requisition', 'material']
+					 Deficient Types: ['purchase_requisition', 'material']
+		
+			 Related Types: ['purchase_requisition', 'material']
+			 Divergent Types: ['purchase_requisition', 'material']
+			 Convergent Types: ['purchase_requisition', 'material']
+			 Deficient Types: ['purchase_requisition', 'material']
+	Create Request for Quotation
+		 Related Types: {'purchase_requisition'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()

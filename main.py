@@ -4,7 +4,7 @@ from src import apply, evaluation_util
 
 if __name__ == "__main__":
 
-	#Provide the directory in which the input logs are place
+	#Provide the directory in which the input logs are placed
 	#OCEL1.0 and 2.0 are both possible with pm4py compatibility
 	data_directory = "data"
 
