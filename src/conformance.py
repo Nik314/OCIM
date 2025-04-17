@@ -98,8 +98,7 @@ def determine_log_context(relations):
             context_hash_to_event_mapping[hash_value] = [index[event]]
 
         event_to_context_mapping[index[event]] = context
-        print("Progress On Log Context: ",len(event_to_context_mapping) / len(graph.nodes()))
-
+        
     context_hash_to_activity_mapping = {key:set(value) for key,value in context_hash_to_activity_mapping.items()}
     return context_hash_to_activity_mapping, event_to_context_mapping, unique_context_list, context_hash_to_event_mapping
 
