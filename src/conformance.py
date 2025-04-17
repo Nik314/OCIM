@@ -98,7 +98,7 @@ def determine_log_context(relations):
             context_hash_to_event_mapping[hash_value] = [index[event]]
 
         event_to_context_mapping[index[event]] = context
-        
+
     context_hash_to_activity_mapping = {key:set(value) for key,value in context_hash_to_activity_mapping.items()}
     return context_hash_to_activity_mapping, event_to_context_mapping, unique_context_list, context_hash_to_event_mapping
 
@@ -268,7 +268,7 @@ def determine_conformance(ocpn, relations):
             for context in cardinality_hash_context_map[hash_value]) / len(event_to_context_map.keys()))
             for hash_value, cardinality in unique_cardinalities.items()]
 
-    result = multiprocessing.Pool(3).starmap(replay_single_cardinality, inputs)
+    result = multiprocessing.Pool(8).starmap(replay_single_cardinality, inputs)
     for entry in result:
         hash_to_conformance.update(entry)
 
