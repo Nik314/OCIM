@@ -1,0 +1,70 @@
+{'Fitness': np.float64(1.0), 'Precision': np.float64(0.7107822703904404), 'Timeouts': 0.05699685534591195, 'Runtime': 8.44584345817566}
+{'operator': '->', 'subtrees': [{'activity': 'Register Customer Order', 'related': {'Customer Order'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Create Transport Document', 'related': {'Transport Document', 'Customer Order'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document', 'Customer Order'], 'divergent': ['Transport Document', 'Customer Order'], 'convergent': ['Transport Document', 'Customer Order'], 'deficient': ['Transport Document', 'Customer Order']}]}, {'activity': 'Book Vehicles', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'operator': 'X', 'subtrees': [{'activity': 'Order Empty Containers', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'operator': '*', 'subtrees': [{'operator': 'X', 'subtrees': [{'operator': 'X', 'subtrees': [{'activity': 'Reschedule Container', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': set(), 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'operator': 'X', 'subtrees': [{'activity': 'Depart', 'related': {'Transport Document'}, 'divergent': set(), 'convergent': {'Transport Document'}, 'deficient': set()}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}, {'activity': '', 'related': ['Transport Document'], 'divergent': ['Transport Document'], 'convergent': ['Transport Document'], 'deficient': ['Transport Document']}]}]}
+->
+	Register Customer Order
+		 Related Types: {'Customer Order'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	X
+		Create Transport Document
+			 Related Types: {'Transport Document', 'Customer Order'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['Transport Document', 'Customer Order']
+			 Divergent Types: ['Transport Document', 'Customer Order']
+			 Convergent Types: ['Transport Document', 'Customer Order']
+			 Deficient Types: ['Transport Document', 'Customer Order']
+	Book Vehicles
+		 Related Types: {'Transport Document'}
+		 Divergent Types: set()
+		 Convergent Types: set()
+		 Deficient Types: set()
+	X
+		Order Empty Containers
+			 Related Types: {'Transport Document'}
+			 Divergent Types: set()
+			 Convergent Types: set()
+			 Deficient Types: set()
+		
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']
+	X
+		*
+			X
+				X
+					Reschedule Container
+						 Related Types: {'Transport Document'}
+						 Divergent Types: set()
+						 Convergent Types: set()
+						 Deficient Types: set()
+					
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+				X
+					Depart
+						 Related Types: {'Transport Document'}
+						 Divergent Types: set()
+						 Convergent Types: {'Transport Document'}
+						 Deficient Types: set()
+					
+						 Related Types: ['Transport Document']
+						 Divergent Types: ['Transport Document']
+						 Convergent Types: ['Transport Document']
+						 Deficient Types: ['Transport Document']
+			
+				 Related Types: ['Transport Document']
+				 Divergent Types: ['Transport Document']
+				 Convergent Types: ['Transport Document']
+				 Deficient Types: ['Transport Document']
+		
+			 Related Types: ['Transport Document']
+			 Divergent Types: ['Transport Document']
+			 Convergent Types: ['Transport Document']
+			 Deficient Types: ['Transport Document']

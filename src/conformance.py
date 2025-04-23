@@ -1,10 +1,15 @@
 import copy
+
+import pm4py
 import rustworkx
 import hashlib
 import multiprocessing
 import numpy
 from multiset import Multiset
 from itertools import chain, combinations, product
+import math
+
+from numpy.ma.extras import hsplit
 
 
 class State:
@@ -103,6 +108,47 @@ def determine_log_context(relations):
     return context_hash_to_activity_mapping, event_to_context_mapping, unique_context_list, context_hash_to_event_mapping
 
 
+def get_token_history(token_dict, state):
+
+    history_dict = {ot:{o:[] for o in token_dict[ot]} for ot in token_dict.keys()}
+    for transition,objects in state.sequence:
+        if not transition.silent:
+            for ot in objects:
+                for o in objects[ot]:
+                    if ot in history_dict and o in history_dict[ot]:
+                        history_dict[ot][o].append(transition.label)
+
+    return history_dict
+
+
+def get_token_classes(history_dict):
+
+    classes = {}
+    for ot,pairs in history_dict.items():
+        classes[ot] = {}
+        for o,history in pairs.items():
+            if tuple(history) in classes[ot]:
+                classes[ot][tuple(history)].append(o)
+            else:
+                classes[ot][tuple(history)] = [o]
+
+    return classes
+
+
+def get_equivalent_subsets(token_classes, variable_types):
+
+    subsets = {ot:[] for ot in token_classes.keys()}
+    for ot,classes in token_classes.items():
+        if ot not in variable_types:
+            subsets[ot] = [[value[0]] for value in classes.values()]
+        else:
+            selections = {history:[value[:i] for i in range(0, len(value)+1)] for history,value in classes.items()}
+            selection_combination = product(*selections.values())
+            subsets[ot] = [sum(combi,[]) for combi in selection_combination]
+            subsets[ot].remove([])
+    return subsets
+
+
 def get_unique_start_marking(unique_context_list):
 
     unique_cardinalities = {}
@@ -139,12 +185,11 @@ def get_enabled_transitions(transitions, places, arcs, state):
 
         if all(available_tokens[ot] for ot in available_tokens.keys()):
 
-            available_subsets = {ot:[[token] for token in available_tokens[ot]]
-                if ot not in variable_types else list(chain.from_iterable(combinations(available_tokens[ot], r)
-                for r in range(len(available_tokens[ot]) + 1))) for ot in available_tokens.keys()}
+            history_dict = get_token_history(available_tokens, state)
+            token_classes = get_token_classes(history_dict)
+            available_subsets = get_equivalent_subsets(token_classes,variable_types)
             ot_list = list(available_tokens.keys())
             index_combinations = product(*[range(len(available_subsets[ot]))for ot in ot_list])
-
             results += [(t,{ot_list[i]: [j for j in available_subsets[ot_list[i]][combi[i]]] for i in range(len(ot_list))})
                 for combi in index_combinations]
 
@@ -210,18 +255,20 @@ def replay_single_cardinality(ocpn, contained_contexts, cardinality, log_enabled
 
         current_state = state_queue[0]
         adapt_result_for_match(current_state,contained_contexts,context_hash_to_enabled_activities,all_types)
+        enabled = get_enabled_transitions(transitions, places, arcs, current_state)
 
-        if (current_state.get_state_hash(all_types) in visited_information or not
-                any(check_context_reachable(context,current_state.get_state_context(all_types)) for context in contained_contexts)):
-            state_queue.remove(current_state)
-            del current_state
-            continue
+        for transition, objects in enabled:
+            next_state = fire_enabled_transition(transitions,places,arcs,current_state,transition,objects)
+            if not next_state.get_state_hash(all_types) in visited_information and \
+                    any(check_context_reachable(context,current_state.get_state_context(all_types)) for context in contained_contexts):
+                state_queue.append(next_state)
 
-        if len(visited_information) >= (event_size*1000000):
+            if len(visited_information) > 70000:
+                break
+
+        if len(visited_information) > 70000:
             break
 
-        state_queue += [fire_enabled_transition(transitions,places,arcs,current_state,transition,objects)
-            for transition,objects in get_enabled_transitions(transitions,places,arcs,current_state)]
         state_queue.remove(current_state)
         visited_information.append(current_state.get_state_hash(all_types))
         del current_state
@@ -268,7 +315,9 @@ def determine_conformance(ocpn, relations):
             for context in cardinality_hash_context_map[hash_value]) / len(event_to_context_map.keys()))
             for hash_value, cardinality in unique_cardinalities.items()]
 
-    result = multiprocessing.Pool(8).starmap(replay_single_cardinality, inputs)
+    cores = 12
+    print(f"Running On {cores} Cores!")
+    result = multiprocessing.Pool(cores).starmap(replay_single_cardinality, inputs)
     for entry in result:
         hash_to_conformance.update(entry)
 
@@ -281,5 +330,4 @@ def determine_conformance(ocpn, relations):
 
     print(numpy.mean(total_fitness),numpy.mean(total_precision),len(total_timed)/len(event_to_context_map.keys()))
     return numpy.mean(total_fitness),numpy.mean(total_precision),len(total_timed)/len(event_to_context_map.keys())
-
 
