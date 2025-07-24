@@ -129,11 +129,11 @@ def convert_ocpt_to_ocpn(ocpt, storage):
         pt = pt_util.reduce_tau_leafs(pt)
         pt = pt_util.fold(pt)
         net,im,fm = pm4py.convert_to_petri_net(pt)
-        net = pm4py.objects.petri_net.utils.reduction.apply_simple_reduction(net)
-        net = pm4py.objects.petri_net.utils.reduction.apply_fpp_rule(net,im)
-        net = pm4py.objects.petri_net.utils.reduction.apply_fpt_rule(net)
-        net,im,fm = pm4py.objects.petri_net.utils.reduction.apply_fsp_rule(net,im,fm)
-        net = pm4py.objects.petri_net.utils.reduction.apply_fst_rule(net)
+        #net = pm4py.objects.petri_net.utils.reduction.apply_simple_reduction(net)
+        #net = pm4py.objects.petri_net.utils.reduction.apply_fpp_rule(net,im)
+        #net = pm4py.objects.petri_net.utils.reduction.apply_fpt_rule(net)
+        #net,im,fm = pm4py.objects.petri_net.utils.reduction.apply_fsp_rule(net,im,fm)
+        #net = pm4py.objects.petri_net.utils.reduction.apply_fst_rule(net)
         nets[ot] = net,im,fm
         pm4py.write_pnml(*nets[ot],f"{storage}/{ot.replace(":","_")}.pnml")
         convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
