@@ -1,7 +1,9 @@
+import time
 import pm4py
+
 from src.ocpn_conversion import project_ocpt
 from src.oc_process_trees import *
-
+import math
 
 def get_tree_abstraction(tree):
 
@@ -111,39 +113,48 @@ def get_tree_interaction_patterns(tree):
     return rel,div,con,defi,opt
 
 
+def add_parents(tree,parent):
+    if parent:
+        tree.parent = parent
+    if tree.operator:
+        for sub in tree.children:
+            add_parents(sub,tree)
+    return tree
+
+
 def get_tree_dfgs(tree):
     return {ot:dfg_recursion(project_ocpt(tree,ot))[:3] for ot in tree.get_object_types()}
 
 
-def dfg_recursion(pt):
+def dfg_recursion(pt,output = False):
+
     if pt.operator == Operator.SEQUENCE:
-        sub_dfgs = [dfg_recursion(sub) for sub in pt.children]
+        sub_dfgs = [dfg_recursion(sub,output) for sub in pt.children]
         dfg,start,end,optional,sigma= {},{},{},True,[]
-        try:
-            first_non_optional = min([i for i in range(0,len(sub_dfgs)) if not sub_dfgs[i][3]])
-        except:
-            first_non_optional = len(sub_dfgs)
-        try:
-            last_non_optional = max([i for i in range(0,len(sub_dfgs)) if not sub_dfgs[i][3]])
-        except:
-            last_non_optional = 0
 
         for i in range(0,len(sub_dfgs)):
-            sub_dfg, sub_start, sub_end, sub_optional, sub_sigma = sub_dfgs[i]
-            dfg.update(sub_dfg)
-            sigma += sub_sigma
-            if i <= first_non_optional:
-                start.update(sub_start)
-            if i >= last_non_optional:
-                end.update(sub_start)
-            if i < len(sub_dfgs)-1:
-                new_rules = {(a,b):1 for a in sub_end for b in sub_dfgs[i+1][2]}
-                dfg.update(new_rules)
+            sub_dfg,sub_start,sub_end, sub_optional,sub_sigma = sub_dfgs[i]
             optional = optional and sub_optional
+            sigma = sigma+sub_sigma
+            dfg.update(sub_dfgs[i][0])
+
+            if all(sub_dfgs[j][3] for j in range(0,i)):
+                start.update(sub_start)
+            if all(sub_dfgs[j][3] for j in range(i+1,len(sub_dfgs))):
+                end.update(sub_end)
+
+            for j in range(0, i):
+                if all(sub_dfgs[k][3] for k in range(j+1,i)):
+                    dfg.update({(a,b):1 for a in sub_dfgs[j][2] for b in sub_start})
+
+            for j in range(i+1, len(sub_dfgs)):
+                if all(sub_dfgs[k][3] for k in range(i+1,j)):
+                    dfg.update({(a,b):1 for b in sub_dfgs[j][1] for a in sub_end})
+
         return dfg,start,end,optional,sigma
 
     elif pt.operator == Operator.XOR:
-        sub_dfgs = [dfg_recursion(sub) for sub in pt.children]
+        sub_dfgs = [dfg_recursion(sub,output) for sub in pt.children]
         dfg, start, end, optional, sigma = {}, {}, {}, False, []
 
         for i in range(0,len(sub_dfgs)):
@@ -151,22 +162,22 @@ def dfg_recursion(pt):
             dfg.update(sub_dfg)
             sigma += sub_sigma
             start.update(sub_start)
-            end.update(sub_start)
+            end.update(sub_end)
             optional = optional or sub_optional
 
         return dfg,start,end,optional,sigma
 
     elif pt.operator == Operator.PARALLEL:
-        sub_dfgs = [dfg_recursion(sub) for sub in pt.children]
-        dfg, start, end, optional, sigma = {}, {}, {}, False, []
+        sub_dfgs = [dfg_recursion(sub,output) for sub in pt.children]
+        dfg, start, end, optional, sigma = {}, {}, {}, True, []
 
         for i in range(0, len(sub_dfgs)):
             sub_dfg, sub_start, sub_end, sub_optional, sub_sigma = sub_dfgs[i]
             dfg.update(sub_dfg)
             sigma += sub_sigma
             start.update(sub_start)
-            end.update(sub_start)
-            optional = optional or sub_optional
+            end.update(sub_end)
+            optional = optional and sub_optional
 
             for j in range(i+1,len(sub_dfgs)):
                 other_sigma = sub_dfgs[j][4]
@@ -179,7 +190,7 @@ def dfg_recursion(pt):
 
     elif pt.operator == Operator.LOOP:
 
-        sub_dfgs = [dfg_recursion(sub) for sub in pt.children]
+        sub_dfgs = [dfg_recursion(sub,output) for sub in pt.children]
         dfg, start, end, optional, sigma = {}, {}, {}, sub_dfgs[0][3], []
 
         for i in range(0, len(sub_dfgs)):
@@ -202,11 +213,12 @@ def dfg_recursion(pt):
 
         newrules = {(a, b): 1 for a in end.keys() for b in start.keys()}
         dfg.update(newrules)
+
         return dfg, start, end, optional, sigma
 
     else:
         dfg,start,end,optional,sigma = {},{},{},True,[]
-        if pt.label:
+        if pt.label and pt.label != "":
             start[pt.label] = 1
             end[pt.label] = 1
             optional = False

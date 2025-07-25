@@ -1,13 +1,11 @@
+import logging
 import os
 from itertools import chain,combinations
 import matplotlib.pyplot as plt
 import seaborn
 import pandas
-
-from  src.conformance import determine_conformance
-import ocpa.visualization.oc_petri_net.factory
 from src.ocpn_conversion import *
-
+import math
 
 
 def check_stats_print(dir_path):
@@ -50,18 +48,12 @@ def export_ocpn(file_path, ocpn, additional=None):
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpn))
 
-	ocpa.visualization.oc_petri_net.factory.save(
-		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpn",".png"))
 
-
-def export_ocpt(file_path, ocpt, ocpn, additional=None):
+def export_ocpt(file_path, ocpt, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
 		text_file.write(str(ocpt.get_as_dict()) + "\n")
 		text_file.write(str(ocpt))
-
-	ocpa.visualization.oc_petri_net.factory.save(
-		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpt",".png"))
 
 def adjusted_log(relations, affected_activities):
 
@@ -136,53 +128,26 @@ def plot_experiment_2(result_dir):
 
 
 
-def run_experiment_3(dir_path, result_dir, discovery, file):
+def run_experiment_3(dir_path, result_dir, discovery):
+
+	if not os.path.isdir(result_dir):
+		os.mkdir(result_dir)
 
 	try:
-		log = pm4py.read_ocel2(dir_path+ "/" + file)
+		conformance_results = pandas.read_csv(result_dir+"/experiment3.csv")
 	except:
-		log = pm4py.read_ocel(dir_path+ "/" + file)
+		conformance_results = pandas.DataFrame(columns=["Log", "Fitness", "Precision"])
 
+	for file in os.listdir(dir_path):
 
-	if not os.path.isdir(result_dir+"/"+file.split(".")[0]):
-		os.mkdir(result_dir+"/"+file.split(".")[0])
-
-	storage = result_dir+"/"+file.split(".")[0]
-	object_types = log.relations["ocel:type"].unique()
-	type_pairs = [(object_types[i],object_types[j])  for i in range(0,len(object_types)) for j in range(i+1,len(object_types))]
-	pm4py.write_ocel2(log, f"{storage}/{file.split('.')[0]}.jsonocel")
-
-	for ot1,ot2 in type_pairs:
-
-		print(ot1,ot2)
-		sub_storage = storage + "/" + (str(ot1) + str(ot2)).replace(":","").replace(" ","")
-
-		sublog = pm4py.filter_ocel_object_types(log,[ot1,ot2],positive=True)
-		if sublog.relations.groupby("ocel:eid").apply(lambda frame:frame["ocel:type"].nunique()).max() <= 1:
+		print(file)
+		if file in conformance_results["Log"].unique():
 			continue
 
-		if os.path.isfile(f"{sub_storage}/{file.split('.')[0]}.ocpt"):
-			print("Object Types Already Done")
-			continue
-
-		if not os.path.isdir(sub_storage):
-			os.mkdir(sub_storage)
-
-		pm4py.write_ocel2(sublog, f"{sub_storage}/{file.split('.')[0]}.jsonocel")
-
-		start = time.time()
-		ocpt, _, __ = discovery(f"{sub_storage}/{file.split('.')[0]}.jsonocel")
-		runtime = time.time() -start
+		ocpt,runtime_stats, quality_stats = discovery(f"{dir_path}/{file}")
 		print("OCPT Discovery Completed")
-		ocpn, special_activities = convert_ocpt_to_ocpn(ocpt, sub_storage)
-		print("OCPN Conversion Completed")
 
-		fitness, precision, timeout = determine_conformance(ocpn,adjusted_log(sublog.relations,special_activities))
-		export_ocpt(f"{sub_storage}/{file.split('.')[0]}.ocpt",ocpt,ocpn, {"Fitness":fitness,
-			"Precision":precision,"Timeouts":timeout, "Runtime":runtime})
-		print("Conformance Check Completed")
-
-
-
-
-
+		from conformance.conformance import determine_conformance
+		fitness, precision = determine_conformance(ocpt, f"{dir_path}/{file}",math.inf)
+		conformance_results.loc[conformance_results.shape[0]] = (file,fitness,precision)
+		conformance_results.to_csv(result_dir+"/experiment3.csv",index=False)

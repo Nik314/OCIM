@@ -1,14 +1,8 @@
-import os.path
-import pprint
-import time
-from os import mkdir
 
-from matplotlib.rcsetup import validate_int
 from pm4py.objects.process_tree.utils import generic as pt_util
 from src.oc_process_trees import OperatorNode,LeafNode
 import pm4py
 from pm4py.objects.petri_net.obj import PetriNet
-from ocpa.objects.oc_petri_net.obj import ObjectCentricPetriNet
 import uuid
 from pm4py.objects.process_tree.obj import ProcessTree,Operator
 
@@ -16,11 +10,11 @@ from pm4py.objects.process_tree.obj import ProcessTree,Operator
 
 def project_ocpt(ocpt,object_type):
 
-
-
     if isinstance(ocpt,LeafNode):
         if ocpt.activity == "" or object_type not in ocpt.related:
             return ProcessTree()
+        if object_type in ocpt.divergent:
+            return ProcessTree(Operator.LOOP,children = [ProcessTree(),ProcessTree(label=ocpt.activity)])
         return ProcessTree(label=ocpt.activity)
 
     assert isinstance(ocpt,OperatorNode)
@@ -115,95 +109,3 @@ def handle_deficiency(ocpt):
             return ocpt,[]
 
 
-
-def convert_ocpt_to_ocpn(ocpt, storage):
-
-    assert isinstance(ocpt,OperatorNode) or isinstance(ocpt,LeafNode)
-    nets = {}
-
-    convergent_activities = {}
-    ocpt, special_activities = handle_deficiency(ocpt)
-
-    for ot in ocpt.get_object_types():
-        pt = project_ocpt(ocpt,ot)
-        pt = pt_util.reduce_tau_leafs(pt)
-        pt = pt_util.fold(pt)
-        net,im,fm = pm4py.convert_to_petri_net(pt)
-        #net = pm4py.objects.petri_net.utils.reduction.apply_simple_reduction(net)
-        #net = pm4py.objects.petri_net.utils.reduction.apply_fpp_rule(net,im)
-        #net = pm4py.objects.petri_net.utils.reduction.apply_fpt_rule(net)
-        #net,im,fm = pm4py.objects.petri_net.utils.reduction.apply_fsp_rule(net,im,fm)
-        #net = pm4py.objects.petri_net.utils.reduction.apply_fst_rule(net)
-        nets[ot] = net,im,fm
-        pm4py.write_pnml(*nets[ot],f"{storage}/{ot.replace(":","_")}.pnml")
-        convergent_activities[ot] = [a for a in ocpt.get_activities() if ot in ocpt.get_type_information()[(a,"con")]]
-
-    places = []
-    transitions = []
-    arcs = []
-    place_mapping = {}
-    transition_mapping = {}
-    arc_mapping = {}
-    for index, persp in enumerate(nets):
-        net, im, fm = nets[persp]
-        pl_count = 1
-        for pl in net.places:
-            p_name = "%s%d" % (persp, pl_count)
-            pl_count += 1
-            if pl in im:
-                p = ObjectCentricPetriNet.Place(name=p_name,
-                                                object_type=persp, initial=True)
-            elif pl in fm:
-                p = ObjectCentricPetriNet.Place(
-                    name=p_name, object_type=persp, final=True)
-            else:
-                p = ObjectCentricPetriNet.Place(
-                    name=p_name, object_type=persp)
-            place_mapping[pl] = p
-            places.append(p)
-
-        for tr in net.transitions:
-            t = None
-            for _, new_t in transition_mapping.items():
-                if tr.label == new_t.label:
-                    t = new_t
-            if t is None:
-                this_uuid = str(uuid.uuid4())
-                if tr.label != "" and tr.label != None:
-                    t = ObjectCentricPetriNet.Transition(
-                        name=this_uuid, label=tr.label)
-                else:
-                    t = ObjectCentricPetriNet.Transition(
-                        name=this_uuid, label=this_uuid, silent=True)
-                transitions.append(t)
-            transition_mapping[tr] = t
-
-        for arc in net.arcs:
-            if type(arc.source) == PetriNet.Transition:
-                t = transition_mapping[arc.source]
-                p = place_mapping[arc.target]
-                if arc.source.label in convergent_activities[persp]:
-                    a = ObjectCentricPetriNet.Arc(t, p, variable=True)
-                else:
-                    a = ObjectCentricPetriNet.Arc(t, p)
-                p.in_arcs.add(a)
-                t.out_arcs.add(a)
-                arcs.append(a)
-            else:
-                t = transition_mapping[arc.target]
-                p = place_mapping[arc.source]
-                if arc.target.label in convergent_activities[persp]:
-                    a = ObjectCentricPetriNet.Arc(p, t, variable=True)
-                else:
-                    a = ObjectCentricPetriNet.Arc(p, t)
-
-                p.out_arcs.add(a)
-                t.in_arcs.add(a)
-                arcs.append(a)
-            arc_mapping[arc] = a
-
-    ocpn = ObjectCentricPetriNet(
-        places=set(places), transitions=set(transitions), arcs=set(arcs), nets=nets, place_mapping=place_mapping,
-        transition_mapping=transition_mapping, arc_mapping=arc_mapping)
-
-    return ocpn, special_activities

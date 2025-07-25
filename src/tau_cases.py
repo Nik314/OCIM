@@ -5,7 +5,6 @@ import time
 
 def detect_tau_cases(local_data, global_data):
 
-
     if len(local_data.expected_objects) > len(local_data.object_set):
 
         combined_input = pandas.concat(local_data.oc_log_list)
@@ -14,7 +13,8 @@ def detect_tau_cases(local_data, global_data):
         missing_types = combined_original[combined_original["ocel:oid"].isin(missing_objects)]["ocel:type"].unique()
         local_data.expected_objects = local_data.object_set
 
-        if any(ot in combined_input["ocel:type"].unique() for ot in missing_types):
+        tau_types = [ot for ot in missing_types if ot in combined_input["ocel:type"].unique()]
+        if tau_types:
             return [local_data.alphabet, []], Operator.XOR
 
 

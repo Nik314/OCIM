@@ -2,8 +2,6 @@ import pandas
 import datetime
 import pm4py
 
-from ocpa.visualization.log.variants.versions.chevron_sequences import event_to_y
-
 example_log = pandas.DataFrame({"ocel:timestamp":[],"ocel:oid":[],"ocel:type":[],"ocel:activity":[],"ocel:eid":[]})
 
 events = [
@@ -42,7 +40,6 @@ events = [
     ("send", {"O5", "I9"}),
 ]
 
-
 i = 0
 for event in events:
     for oid in event[1]:
@@ -52,6 +49,10 @@ for event in events:
     print(f"\\textsc{{{event[0]}}} & $ \\{{{substring}\\}}$ &")
 
 print(example_log)
+from src import apply
+print(apply("", input_log=example_log)[0])
+exit()
+
 
 for ot in example_log["ocel:type"].unique():
     print(ot)
