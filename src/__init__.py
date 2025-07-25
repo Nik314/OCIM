@@ -63,7 +63,7 @@ def object_centric_inductive_miner(local_data, global_data, brute_force = False,
             partition, operator = detect_fallthrough_fitness_brute_force(local_data,global_data)
         global_data.runtime_info["fallthroughs"].append(time.time()-start)
 
-
+    print(operator,partition)
     start = time.time()
     sublogs = split_log(local_data,partition,operator,global_data)
     global_data.runtime_info["splits"].append(time.time() - start)

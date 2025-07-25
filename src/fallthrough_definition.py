@@ -12,6 +12,8 @@ def is_concurrent_fallthrough_valid(local_data, global_data, partition_list):
 
 def is_exclusive_fallthrough_valid(local_data, global_data, partition_list):
 
+    if set(sum(partition_list, [])) != set(local_data.alphabet):
+        return False
     # check for the absence of any connection between activities in different partition parts
     # for object types that are not fully divergent on the two partition parts (Section 3.1, Equation 20)
     for (i, j) in itertools.combinations(range(len(partition_list)), 2):
@@ -32,6 +34,8 @@ def is_exclusive_fallthrough_valid(local_data, global_data, partition_list):
 
 
 def is_sequence_fallthrough_valid(local_data, global_data, partition_list):
+    if set(sum(partition_list, [])) != set(local_data.alphabet):
+        return False
 
     for (i, j) in itertools.combinations(range(len(partition_list)), 2):
         if i > j: i,j = j,i
@@ -57,6 +61,8 @@ def is_sequence_fallthrough_valid(local_data, global_data, partition_list):
 
 def is_loop_fallthrough_valid(local_data, global_data, partition_list):
 
+    if set(sum(partition_list, [])) != set(local_data.alphabet):
+        return False
     # check if there is at least one non diverging object type between the two
     # partition parts (Section 3.1., Equation 26)
 

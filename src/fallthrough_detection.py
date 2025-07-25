@@ -64,6 +64,9 @@ def detect_fallthrough_exclusive(local_data, global_data):
         part_one = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 0],[])
         part_two = sum([partition[i] for i in range(0,len(partition)) if kmeans.labels_[i] == 1],[])
 
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        return -1,None,None
+
     return evaluate_xor_fallthrough(local_data,global_data,part_one,part_two)[0],[part_one, part_two], Operator.XOR
 
 
@@ -97,6 +100,9 @@ def detect_fallthrough_sequence(local_data, global_data):
         if score >= best_score:
             best_score = score
             best_partition = [part_one,part_two]
+
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        return -1,None,None
 
     return best_score,best_partition, Operator.SEQUENCE
 
@@ -144,6 +150,9 @@ def detect_fallthrough_loop(local_data, global_data):
                     if evaluate_loop_fallthrough(local_data,global_data,body,redo)[0] > best_score:
                         best_score, operator = evaluate_loop_fallthrough(local_data,global_data,body,redo)
                         best_partition = [body,redo]
+
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        return -1,None,None
 
     return best_score, best_partition, Operator.LOOP
 
