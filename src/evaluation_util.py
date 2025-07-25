@@ -54,7 +54,6 @@ def export_ocpn(file_path, ocpn, additional=None):
 		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpn",".png"))
 
 
-
 def export_ocpt(file_path, ocpt, ocpn, additional=None):
 	with open(file_path, "w") as text_file:
 		text_file.write(str(additional) + "\n")
@@ -63,7 +62,6 @@ def export_ocpt(file_path, ocpt, ocpn, additional=None):
 
 	ocpa.visualization.oc_petri_net.factory.save(
 		ocpa.visualization.oc_petri_net.factory.apply(ocpn), file_path.replace(".ocpt",".png"))
-
 
 def adjusted_log(relations, affected_activities):
 
@@ -94,7 +92,6 @@ def experiment_1_and_2(dir_path,discovery, result_dir):
 	for file in os.listdir(dir_path):
 
 		print(file)
-
 		if file in runtime_result["Log"].unique():
 			continue
 
@@ -136,8 +133,6 @@ def plot_experiment_2(result_dir):
 	plot_data = {"Object-Centric Input Log":[point[0].split("_")[0] for point in plot_data], "Fallthrough Precision Estimate":[point[1] for point in plot_data]}
 	seaborn.stripplot(plot_data,y="Fallthrough Precision Estimate",x="Object-Centric Input Log",dodge=True)
 	plt.show()
-
-
 
 
 
