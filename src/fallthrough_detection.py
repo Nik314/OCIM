@@ -163,7 +163,6 @@ def detect_fallthrough_fitness_polynomial(local_data, global_data):
 
 
 
-
 def detect_fallthrough_fitness_brute_force(local_data, global_data):
 
     best_score,best_partition, best_operator = 0.00, None, None

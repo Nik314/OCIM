@@ -1,6 +1,6 @@
 import numpy
 from conformance.log_abstraction import get_log_abstraction
-from conformance.tree_abstraction import get_tree_abstraction
+from conformance.tree_abstraction import get_tree_abstraction,dfg_recursion
 import pm4py
 
 def determine_conformance(ocpt, file_path,timeout):
@@ -14,6 +14,24 @@ def determine_conformance(ocpt, file_path,timeout):
     fitness = get_fitness(log_abstraction,tree_abstraction)
     precision = get_precision(log_abstraction,tree_abstraction)
     return fitness, precision
+
+def determine_conformance_pt_collection(pts,file_path):
+    try:
+        input_log = pm4py.read_ocel2(file_path).relations
+    except:
+        input_log = pm4py.read_ocel(file_path).relations
+
+    log_abstraction = get_log_abstraction(input_log)
+    dfgs = {key:dfg_recursion(pt)[:3] for key,pt in pts.items()}
+    rel,div,con,defi,opt = log_abstraction[1:]
+    defi = {a:set() for a in rel.keys()}
+    div = {a:set([ot for ot in dfgs.keys() if (a,a) in dfgs[ot][0].keys()]) for a in rel.keys()}
+    tree_abstraction = dfgs,rel,div,con,defi,opt
+    fitness = get_fitness(log_abstraction,tree_abstraction)
+    precision = get_precision(log_abstraction,tree_abstraction)
+    return fitness, precision
+
+
 
 
 

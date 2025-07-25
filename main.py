@@ -13,14 +13,13 @@ if __name__ == "__main__":
 	result_directory = "results"
 
 	#Next, decide which experiments you want to run
-	#By default, all four from the paper are executed
-	#Note, this will take some time and use lots of cores
-
-	#evaluation_util.experiment_1_and_2(data_directory,apply,result_directory)
-	#evaluation_util.print_experiment_1(result_directory)
-	#evaluation_util.plot_experiment_2(result_directory)
+	#By default, all from the paper are executed
+	#Note, this will take some time
+	evaluation_util.experiment_1_and_2(data_directory,apply,result_directory)
 	evaluation_util.run_experiment_3("data","results", apply)
+	evaluation_util.run_experiment_4("data","results")
+	evaluation_util.run_experiment_5("data","results")
 
-
-
+	evaluation_util.print_experiment_1(result_directory)
+	evaluation_util.plot_experiment_2(result_directory)
 

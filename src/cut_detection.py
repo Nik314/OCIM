@@ -48,7 +48,6 @@ def find_cut_concurrent(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
-
     if len(partition) == 1:
         return None, None
 
@@ -257,6 +256,13 @@ def find_cut_sequence(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        print(partition)
+        print(local_data.alphabet)
+        print(operator)
+        print("cut 1")
+        exit()
+
     if len(partition) == 1:
         return None, None
 
@@ -267,6 +273,13 @@ def find_cut_sequence(local_data, global_data):
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
+
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        print(partition)
+        print(local_data.alphabet)
+        print(operator)
+        print("cut 2")
+        exit()
 
     if len(partition) == 1:
         return None, None
@@ -282,9 +295,19 @@ def find_cut_sequence(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
+    if set(sum(partition, [])) != set(local_data.alphabet):
+        print(partition)
+        print(local_data.alphabet)
+        print(operator)
+        print("cut 3")
+        exit()
+
     change = True
     while change:
         partition, change = remove_cycles(partition,local_data,global_data)
+
+    if len(partition) == 1:
+        return None, None
 
     partition = [partition[i] for i in networkx.topological_sort(networkx.DiGraph(get_partition_follows_relations(local_data,global_data,partition)))]
 
