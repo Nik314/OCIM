@@ -204,7 +204,7 @@ def run_experiment_5(dir_path, result_dir):
 			input_log = pm4py.read_ocel(f"{dir_path}/{file}").relations
 
 		pts  = {ot:pm4py.discover_process_tree_inductive(input_log[input_log["ocel:type"]==ot],activity_key="ocel:activity",
-				timestamp_key="ocel:timestamp",case_id_key="ocel:oid",noise_threshold=0.0)for ot in input_log["ocel:type"].unique()}
+				timestamp_key="ocel:timestamp",case_id_key="ocel:oid")for ot in input_log["ocel:type"].unique()}
 		print("OCPN Discovery Completed")
 
 		from conformance.conformance import determine_conformance_pt_collection

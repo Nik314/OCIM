@@ -7,10 +7,9 @@ from the preliminary Section 2.4 on object-centric event logs. Some optimization
 expensive runtimes for the calculation of the divergence property. All three patterns are checked in one go. """
 
 
-def get_interaction_patterns(relation_frames):
+def get_interaction_patterns(oc_log_list):
 
-    relations =  pandas.concat(relation_frames)
-
+    relations = pandas.concat(oc_log_list)
     convergent_object_types = {a: set() for a in relations["ocel:activity"].unique()}
     divergent_object_types = {a: set() for a in relations["ocel:activity"].unique()}
     deficient_object_types = {a: set() for a in relations["ocel:activity"].unique()}
@@ -32,7 +31,7 @@ def get_interaction_patterns(relation_frames):
                 if not sub_sub_relations["ocel:eid"].nunique() > 0:
                     related_object_types[activity].remove(object_type)
                 else:
-                    if sub_sub_relations["ocel:eid"].nunique() < sub_relations["ocel:eid"].nunique():
+                    if object_type in related_object_types[activity] and sub_sub_relations["ocel:eid"].nunique() < sub_relations["ocel:eid"].nunique():
                         deficient_object_types[activity].add(object_type)
 
 
@@ -44,6 +43,8 @@ def get_interaction_patterns(relation_frames):
     for object_type in relations["ocel:type"].unique():
         sub_identifiers = identifiers[identifiers[object_type] != set()]
         for activity in relations["ocel:activity"].unique():
+            if object_type not in related_object_types[activity]:
+                continue
             sub_sub_identifiers = sub_identifiers[sub_identifiers["activity"] == activity]
 
             matches = sub_sub_identifiers.groupby(object_type).apply(lambda frame: frame["all"].nunique())

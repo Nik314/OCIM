@@ -1,0 +1,13 @@
+Log,Fitness,Precision
+01_ocel_standard_container_logistics.json,1.0,0.5569932236460475
+02_ocel_standard_order_management.json,1.0,0.7030532598714416
+03_ocel_standard_p2p.json,1.0,0.7813425925925925
+04_ocel_lrms_o2c.xml,1.0,0.5437459703417151
+05_ocel_lrms_p2p.xml,1.0,0.5868055555555556
+06_ocel_lrms_hr.xml,1.0,0.6429330065359478
+07_ocel_lrms_hospital.xml,1.0,0.8303118908382066
+08_ocel_standard_production.xml,1.0,0.5116522366522367
+09_ocel_legacy_recruiting.jsonocel,1.0,0.6424652777777777
+10_ocel_legacy_transfer_order.jsonocel,1.0,0.8422222222222222
+11_ocel_legacy_running_example.jsonocel,1.0,0.7522497704315885
+12_ocel_legacy_github_pm4py.jsonocel,1.0,0.44853375527426154

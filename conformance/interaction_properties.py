@@ -1,6 +1,7 @@
 import pandas
 import pm4py
 
+
 def get_interaction_patterns(relations):
 
 

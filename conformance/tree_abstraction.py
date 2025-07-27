@@ -49,12 +49,19 @@ def check_convergence_recursion(tree,a,ot,ot2, leaf_specification,opt,div):
             return check_convergence_recursion(tree.subtrees[0],a,ot,ot2,leaf_specification,opt,div)
 
     assert isinstance(tree,LeafNode)
+
+    if ot2 not in leaf_specification[(tree.activity, "rel")]:
+        return True
+
     if tree.activity == "" or tree.activity =="tau":
         return True
     if ot in leaf_specification[(tree.activity,"con")] or ot in opt[tree.activity]:
         return True
-    if ot2 in leaf_specification[(tree.activity,"def")] or ot in div[tree.activity]:
+    if ot2 in leaf_specification[(tree.activity,"def")] or ot2 in div[tree.activity]:
         return True
+
+    print(a,ot,ot2,tree.activity)
+    print(div)
     return False
 
 
