@@ -8,7 +8,7 @@ import pandas
 import df2miner
 from src.ocpn_conversion import *
 import math
-
+import numpy
 
 def check_stats_print(dir_path):
 	for file in os.listdir(dir_path):
@@ -114,29 +114,44 @@ def experiment_1_and_2_and_3(dir_path,discovery, result_dir):
 
 def print_experiment_1(result_dir):
 
-	result = pandas.read_csv(result_dir+"/experiment1.csv")
+	result = pandas.read_csv(result_dir+"/experiment1.csv").sort_values("Log")
 	result["Remaining"] = result["Total Time"] - (result["Cut Detection"] + result["Fallthrough Detection"] +
 		result["Tau Detection"] + result["Log Splitting"] +result["Interaction Properties"])
 	for row in ["Cut Detection", "Fallthrough Detection", "Tau Detection", "Log Splitting", "Interaction Properties", "Remaining"]:
 		result[row] = round((result[row] / result["Total Time"])*100,2)
 
-	result.apply(lambda row:print(f"{row['Log'].split('_')[0]}& {round(row['Total Time'],2)} & {row['Cut Detection']} & {row['Fallthrough Detection']} "
-							f"& {row['Tau Detection']} & {row['Log Splitting']} & {row['Interaction Properties']} & {row['Remaining']} \\\\"), axis=1)
-
+	result.apply(lambda row:print(f"{row['Log'].split('_')[0]}& {round(row['Total Time'],2)} & {row['Cut Detection']} \%& {row['Fallthrough Detection']} "
+							f"\%& {row['Tau Detection']} \%& {row['Log Splitting']} \%& {row['Interaction Properties']} \%& {row['Remaining']}\% \\\\"), axis=1)
 
 
 def plot_experiment_2(result_dir):
 	seaborn.set(font_scale=2)
-	result = pandas.read_csv(result_dir+"/experiment2.csv")
+	result = pandas.read_csv(result_dir+"/experiment2.csv").sort_values("Log")
 	load_string = lambda input:eval(input.replace("->","Operator.SEQUENCE").replace("X","Operator.XOR").replace("+","Operator.PARALLEL").replace("*","Operator.LOOP"))
 	result["Detected Cuts"] = result["Detected Cuts"].apply(load_string)
 	result["Detected Fallthroughs"] = result["Detected Fallthroughs"].apply(load_string)
 	result["Fallthrough Extent"] = result.apply(lambda row:[(row["Log"],value[2])
 		for value in row["Detected Fallthroughs"]] + [(row["Log"],1.0) for value in row["Detected Cuts"]], axis=1)
 	plot_data = sum(result["Fallthrough Extent"].values,[])
+	mean_data = [(log,numpy.mean([value for sublog,value in plot_data if sublog == log])) for log in result["Log"].unique()]
 	plot_data = {"Object-Centric Input Log":[point[0].split("_")[0] for point in plot_data], "Fallthrough Precision Estimate":[point[1] for point in plot_data]}
-	seaborn.stripplot(plot_data,y="Fallthrough Precision Estimate",x="Object-Centric Input Log",dodge=True)
+	mean_data = {"Object-Centric Input Log":[point[0].split("_")[0] for point in mean_data], "Fallthrough Precision Estimate":[point[1] for point in mean_data]}
+	seaborn.boxplot(plot_data,y="Fallthrough Precision Estimate",x="Object-Centric Input Log",dodge=True)
+	#seaborn.scatterplot(data=mean_data,y="Fallthrough Precision Estimate",x="Object-Centric Input Log", marker="|", s=4, linewidth=25)
 	plt.show()
+
+
+def print_experiment_345(result_dir):
+
+	resultocim = pandas.read_csv(result_dir+"/experiment3.csv").sort_values("Log").set_index("Log")
+	resultdf2 = pandas.read_csv(result_dir+"/experiment4.csv").sort_values("Log").set_index("Log")
+	resultocpn = pandas.read_csv(result_dir+"/experiment5.csv").sort_values("Log").set_index("Log")
+
+	for log in resultocim.index.unique():
+		print(f"{log.split('_')[0]}& {round(resultocim.loc[log]['Fitness'],2)} & {round(resultdf2.loc[log]['Fitness'],2)} & "
+			  f"{round(resultocpn.loc[log]['Fitness'],2)} & {round(resultocim.loc[log]['Precision'],2)} & "
+			  f"{round(resultdf2.loc[log]['Precision'],2)} & {round(resultocpn.loc[log]['Precision'],2)} \\\\\\hline")
+
 
 
 def run_experiment_4(dir_path, result_dir):
