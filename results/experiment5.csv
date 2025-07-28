@@ -8,6 +8,14 @@ Log,Fitness,Precision
 07_ocel_lrms_hospital.xml,0.9629629629629628,1.0
 08_ocel_standard_production.xml,0.987121212121212,0.9375
 09_ocel_legacy_recruiting.jsonocel,0.9858072916666668,0.8361273006134968
-10_ocel_legacy_transfer_order.jsonocel,0.9388888888888889,0.8555555555555555
-11_ocel_legacy_running_example.jsonocel,0.9962121212121211,0.7878099173553719
-12_ocel_legacy_github_pm4py.jsonocel,0.9854166666666667,0.5064264828738514
+10_ocel_legacy_transfer_order.jsonocel,0.9388888888888888,0.8555555555555555
+11_ocel_legacy_running_example.jsonocel,0.9962121212121212,0.7878099173553719
+12_ocel_legacy_github_pm4py.jsonocel,0.9854166666666668,0.5064264828738514
+13_bpic_15_1.jsonocel,,
+14_bpic_15_2.jsonocel,,
+15_bpic_15_3.jsonocel,,
+16_bpic_15_4.jsonocel,,
+17_bpic_15_5.jsonocel,,
+18_ocel_legacy_windows_events.jsonocel,,
+19_bpic_17.jsonocel,0.9913461538461539,0.6616987179487179
+20_ocel_standard_angular.jsonocel,0.9914712153518124,0.3847373984580562

@@ -26,23 +26,26 @@ def find_strict_cut(local_data, global_data):
 
 
 
-def check_concurrent(local_data, global_data, a,b):
+def check_concurrent(local_data, global_data, a,b,lookup_start,lookup_end):
     for ot in global_data.related[a] & global_data.related[b]:
         if not (local_data.dfgs[ot][0].get((a,b),0) and local_data.dfgs[ot][0].get((b,a),0)):
             return True
         if (local_data.dfgs[ot][1].get(a,0) and not local_data.dfgs[ot][1].get(b,0) and
-                b in get_projected_start(local_data,[c for c in local_data.alphabet if c != a])[ot]):
+                b in lookup_start[a][ot]):
             return True
         if (local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][2].get(b,0) and
-                b in get_projected_end(local_data,[c for c in local_data.alphabet if c != a])[ot]):
+                b in lookup_end[a][ot]):
             return True
     return False
 
 
 def find_cut_concurrent(local_data, global_data):
 
-    edges = [[1 if a==b or check_concurrent(local_data, global_data, a,b)
-                   or check_concurrent(local_data, global_data, b,a)
+    lookup_start = {a:get_projected_start(local_data,[c for c in local_data.alphabet if c != a]) for a in local_data.alphabet}
+    lookup_end = {a:get_projected_start(local_data,[c for c in local_data.alphabet if c != a]) for a in local_data.alphabet}
+
+    edges = [[1 if a==b or check_concurrent(local_data, global_data, a,b,lookup_start,lookup_end)
+                   or check_concurrent(local_data, global_data, b,a,lookup_start,lookup_end)
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
 
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
@@ -122,7 +125,7 @@ def find_cut_concurrent(local_data, global_data):
                     assignment[sink].append(i)
                     break
 
-        partition = [sum([partition[i] for i in value],[]) for key,value in assignment]
+        partition = [sum([partition[i] for i in value],[]) for key,value in assignment.items()]
 
     if is_concurrent_cut_valid(local_data,global_data,partition):
         return partition, Operator.PARALLEL
@@ -132,7 +135,7 @@ def find_cut_concurrent(local_data, global_data):
 
 
 
-def check_exclusive_1(local_data, global_data, a, b):
+def check_exclusive_1(local_data, global_data, a, b,lookup_start,lookup_end) :
     for ot in global_data.related[a] & global_data.related[b]:
         if (local_data.dfgs[ot][0].get((a,b),0) or local_data.dfgs[ot][0].get((b,a),0) and
                 ot not in global_data.divergence[a] & global_data.divergence[b]):
@@ -141,10 +144,10 @@ def check_exclusive_1(local_data, global_data, a, b):
                 and ot in global_data.divergence[a] & global_data.divergence[b]):
             return True
         if (local_data.dfgs[ot][1].get(a,0) and not local_data.dfgs[ot][1].get(b,0) and
-                b in get_projected_start(local_data,[c for c in local_data.alphabet if c != a])[ot]):
+                b in lookup_start[a][ot]):
             return True
         if (local_data.dfgs[ot][2].get(a,0) and not local_data.dfgs[ot][2].get(b,0) and
-                b in get_projected_end(local_data,[c for c in local_data.alphabet if c != a])[ot]):
+                b in lookup_end[a][ot]):
             return True
     return False
 
@@ -165,7 +168,12 @@ def check_exclusive_2(local_data, global_data, sigma_i, sigma_j):
 
 def find_cut_exclusive(local_data,global_data):
 
-    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b) or check_exclusive_1(local_data,global_data,b,a)
+
+    lookup_start = {a:get_projected_start(local_data,[c for c in local_data.alphabet if c != a]) for a in local_data.alphabet}
+    lookup_end = {a:get_projected_start(local_data,[c for c in local_data.alphabet if c != a]) for a in local_data.alphabet}
+
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b,lookup_start,lookup_end) or
+                   check_exclusive_1(local_data,global_data,b,a,lookup_start,lookup_end)
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
@@ -173,13 +181,13 @@ def find_cut_exclusive(local_data,global_data):
     if len(partition) == 1:
         return None, None
 
-    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b) or check_exclusive_1(local_data,global_data,b,a)
+    edges = [[1 if a==b or check_exclusive_1(local_data,global_data,a,b,lookup_start,lookup_end) or
+                   check_exclusive_1(local_data,global_data,b,a,lookup_start,lookup_end)
             or check_exclusive_2(local_data,global_data,
             [p for p in partition if a in p][0], [p for p in partition if b in p][0])
             else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
-
     if len(partition) == 1:
         return None, None
 
@@ -256,12 +264,6 @@ def find_cut_sequence(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
-    if set(sum(partition, [])) != set(local_data.alphabet):
-        print(partition)
-        print(local_data.alphabet)
-        print(operator)
-        print("cut 1")
-        exit()
 
     if len(partition) == 1:
         return None, None
@@ -273,13 +275,6 @@ def find_cut_sequence(local_data, global_data):
               else 0 for a in local_data.alphabet] for b in local_data.alphabet]
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
-
-    if set(sum(partition, [])) != set(local_data.alphabet):
-        print(partition)
-        print(local_data.alphabet)
-        print(operator)
-        print("cut 2")
-        exit()
 
     if len(partition) == 1:
         return None, None
@@ -295,12 +290,6 @@ def find_cut_sequence(local_data, global_data):
     n_components, labels = connected_components(csgraph=csr_matrix(edges), directed=False, return_labels=True)
     partition = [[local_data.alphabet[i] for i in range(0,len(local_data.alphabet)) if labels[i] == n] for n in range(0,n_components)]
 
-    if set(sum(partition, [])) != set(local_data.alphabet):
-        print(partition)
-        print(local_data.alphabet)
-        print(operator)
-        print("cut 3")
-        exit()
 
     change = True
     while change:

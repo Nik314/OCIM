@@ -87,14 +87,14 @@ def evaluate_loop_fallthrough(local_data, global_data, part_one, part_two):
                     precision_violation += 1
                 else:
                     precision_correct += 1
-                if not local_data.dfgs[ot][0].get((b, a), 0):
+                if not local_data.dfgs[ot].get((b, a), 0):
                     precision_violation += 1
                 else:
                     precision_correct += 1
     for a in part_one +part_two:
         for b in part_one + part_two:
             for ot in global_data.related[a] & global_data.related[b]:
-                if not local_data.clos[ot][0].get((a, b), 0):
+                if not local_data.clos[ot].get((a, b), 0):
                     precision_violation += 1
                 else:
                     precision_correct += 1

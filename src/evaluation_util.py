@@ -66,7 +66,7 @@ def adjusted_log(relations, affected_activities):
 
 
 
-def experiment_1_and_2(dir_path,discovery, result_dir):
+def experiment_1_and_2_and_3(dir_path,discovery, result_dir):
 
 	if not os.path.isdir(result_dir):
 		os.mkdir(result_dir)
@@ -82,11 +82,16 @@ def experiment_1_and_2(dir_path,discovery, result_dir):
 	except:
 		quality_result = pandas.DataFrame(columns=["Log", "Total Steps", "Detected Cuts", "Detected Fallthroughs"])
 
+	try:
+		conformance_results = pandas.read_csv(result_dir+"/experiment3.csv")
+	except:
+		conformance_results = pandas.DataFrame(columns=["Log", "Fitness", "Precision"])
+
 
 	for file in os.listdir(dir_path):
 
 		print(file)
-		if file in runtime_result["Log"].unique():
+		if file in conformance_results["Log"].unique():
 			continue
 
 		ocpt,runtime_stats, quality_stats = discovery(f"{dir_path}/{file}")
@@ -99,6 +104,11 @@ def experiment_1_and_2(dir_path,discovery, result_dir):
 		quality_result.loc[quality_result.shape[0]] = (file,len(quality_stats["cuts"]) + len(quality_stats["fallthroughs"]),
 											quality_stats["cuts"], quality_stats["fallthroughs"])
 		quality_result.to_csv(result_dir+"/experiment2.csv",index=False)
+		from conformance.conformance import determine_conformance
+		fitness, precision = determine_conformance(ocpt, f"{dir_path}/{file}",math.inf)
+		conformance_results.loc[conformance_results.shape[0]] = (file,fitness,precision)
+		conformance_results.to_csv(result_dir+"/experiment3.csv",index=False)
+
 
 
 
@@ -129,32 +139,6 @@ def plot_experiment_2(result_dir):
 	plt.show()
 
 
-
-def run_experiment_3(dir_path, result_dir, discovery):
-
-	if not os.path.isdir(result_dir):
-		os.mkdir(result_dir)
-
-	try:
-		conformance_results = pandas.read_csv(result_dir+"/experiment3.csv")
-	except:
-		conformance_results = pandas.DataFrame(columns=["Log", "Fitness", "Precision"])
-
-	for file in os.listdir(dir_path):
-
-		print(file)
-		if file in conformance_results["Log"].unique():
-			continue
-
-		ocpt,runtime_stats, quality_stats = discovery(f"{dir_path}/{file}")
-		print("OCPT Discovery Completed")
-
-		from conformance.conformance import determine_conformance
-		fitness, precision = determine_conformance(ocpt, f"{dir_path}/{file}",math.inf)
-		conformance_results.loc[conformance_results.shape[0]] = (file,fitness,precision)
-		conformance_results.to_csv(result_dir+"/experiment3.csv",index=False)
-
-
 def run_experiment_4(dir_path, result_dir):
 
 	if not os.path.isdir(result_dir):
@@ -168,16 +152,20 @@ def run_experiment_4(dir_path, result_dir):
 	for file in os.listdir(dir_path):
 
 		print(file)
-		if file in conformance_results["Log"].unique():
-			continue
+		try:
+			if file in conformance_results["Log"].unique():
+				continue
 
-		ocpt = df2miner.df2_miner_apply(f"{dir_path}/{file}")
-		print("OCPT Discovery Completed")
+			ocpt = df2miner.df2_miner_apply(f"{dir_path}/{file}")
+			print("OCPT Discovery Completed")
 
-		from conformance.conformance import determine_conformance
-		fitness, precision = determine_conformance(ocpt, f"{dir_path}/{file}",math.inf)
-		conformance_results.loc[conformance_results.shape[0]] = (file,fitness,precision)
-		conformance_results.to_csv(result_dir+"/experiment4.csv",index=False)
+			from conformance.conformance import determine_conformance
+			fitness, precision = determine_conformance(ocpt, f"{dir_path}/{file}",math.inf)
+			conformance_results.loc[conformance_results.shape[0]] = (file,fitness,precision)
+			conformance_results.to_csv(result_dir+"/experiment4.csv",index=False)
+		except:
+			conformance_results.loc[conformance_results.shape[0]] = (file, None, None)
+			conformance_results.to_csv(result_dir + "/experiment4.csv", index=False)
 
 
 
@@ -195,19 +183,23 @@ def run_experiment_5(dir_path, result_dir):
 	for file in os.listdir(dir_path):
 
 		print(file)
-		if file in conformance_results["Log"].unique():
-			continue
-
 		try:
-			input_log = pm4py.read_ocel2(f"{dir_path}/{file}").relations
+			if file in conformance_results["Log"].unique():
+				continue
+
+			try:
+				input_log = pm4py.read_ocel2(f"{dir_path}/{file}").relations
+			except:
+				input_log = pm4py.read_ocel(f"{dir_path}/{file}").relations
+
+			pts  = {ot:pm4py.discover_process_tree_inductive(input_log[input_log["ocel:type"]==ot],activity_key="ocel:activity",
+					timestamp_key="ocel:timestamp",case_id_key="ocel:oid")for ot in input_log["ocel:type"].unique()}
+			print("OCPN Discovery Completed")
+
+			from conformance.conformance import determine_conformance_pt_collection
+			fitness, precision = determine_conformance_pt_collection(pts, f"{dir_path}/{file}")
+			conformance_results.loc[conformance_results.shape[0]] = (file, fitness, precision)
+			conformance_results.to_csv(result_dir + "/experiment5.csv", index=False)
 		except:
-			input_log = pm4py.read_ocel(f"{dir_path}/{file}").relations
-
-		pts  = {ot:pm4py.discover_process_tree_inductive(input_log[input_log["ocel:type"]==ot],activity_key="ocel:activity",
-				timestamp_key="ocel:timestamp",case_id_key="ocel:oid")for ot in input_log["ocel:type"].unique()}
-		print("OCPN Discovery Completed")
-
-		from conformance.conformance import determine_conformance_pt_collection
-		fitness, precision = determine_conformance_pt_collection(pts, f"{dir_path}/{file}")
-		conformance_results.loc[conformance_results.shape[0]] = (file, fitness, precision)
-		conformance_results.to_csv(result_dir + "/experiment5.csv", index=False)
+			conformance_results.loc[conformance_results.shape[0]] = (file, None,None)
+			conformance_results.to_csv(result_dir + "/experiment5.csv", index=False)
